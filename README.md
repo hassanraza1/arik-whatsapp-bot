@@ -43,7 +43,7 @@ Customer WhatsApp
        ↓
    Reply via WAHA → Customer WhatsApp
 ```
-
+![Arik Workflow](architecture.png)
 ---
 
 ## Key Features
