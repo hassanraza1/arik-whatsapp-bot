@@ -108,6 +108,24 @@ customers    — id, phone, name, address, created_at
 - Migrating infrastructure mid-production (UltraMsg → WAHA, Supabase → Hetzner)
 
 ---
+## 🗺️ Development Roadmap
+
+This is **Phase 1 of 10** — currently live in production.
+
+| Phase | Focus | Status |
+|---|---|---|
+| **Phase 1** | WhatsApp AI bot — live on real WhatsApp with full sales & quotation flow | ✅ Live |
+| **Phase 2** | Modular workflow architecture — sub-workflows, clean separation of concerns | 🔄 In Progress |
+| **Phase 3** | Knowledge base + RAG — PDF/document ingestion, vector search for smarter answers | 📅 Planned |
+| **Phase 4** | Vision + Voice AI — image recognition for products, voice message support | 📅 Planned |
+| **Phase 5** | Shopify integration — live inventory sync, order management via WhatsApp | 📅 Planned |
+| **Phase 6** | Advanced AI intent classification — fine-tuned models, higher accuracy | 📅 Planned |
+| **Phase 7** | Long-term memory + context — persistent customer profiles, personalization | 📅 Planned |
+| **Phase 8** | Sales intelligence — analytics dashboard, conversion tracking, insights | 📅 Planned |
+| **Phase 9** | Campaign engine — broadcast messaging, follow-ups, promotions automation | 📅 Planned |
+| **Phase 10** | Observability — monitoring, alerting, performance tracking, uptime dashboard | 📅 Planned |
+
+> Each phase builds on the previous. Goal: a fully autonomous AI-powered sales system.
 
 ## Setup & Deployment
 ```bash
