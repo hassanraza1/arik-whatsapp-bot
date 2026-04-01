@@ -10,6 +10,8 @@
 ![Workflow](https://img.shields.io/badge/Workflow-n8n-EA4B71?logo=n8n&logoColor=white)
 
 ---
+## 📱 Live Demo
+![Arik Demo](Arik_Gif.gif)
 
 ## The Problem
 
