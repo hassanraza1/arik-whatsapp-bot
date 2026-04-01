@@ -1,0 +1,2014 @@
+{
+  "name": "WM Arik v2 — Modular",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ai-chat",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -2224,
+        368
+      ],
+      "id": "9b0edb24-cf09-432e-9d01-5e49a20652f5",
+      "name": "Webhook",
+      "webhookId": "YOUR_WEBHOOK_ID"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "88d282c4-fec2-43de-b4b6-7e09afda48a6",
+              "name": "message",
+              "value": "={{ $json.body.payload.body }}",
+              "type": "string"
+            },
+            {
+              "id": "596e1614-4b53-4a5a-b509-0b477017eedc",
+              "name": "session_id",
+              "value": "={{ $json.body.payload.from.replace('@c.us','').replace('@lid','').replace('@lId','') }}",
+              "type": "string"
+            },
+            {
+              "id": "65f015d6-1f73-419e-af59-614f7673dd6c",
+              "name": "lower_msg",
+              "value": "={{ $json.body.payload.body.toLowerCase().trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "68e82dba-6ca3-4e35-a1ca-3237de445eb6",
+              "name": "chat_id",
+              "value": "={{ $json.body.payload.from }}",
+              "type": "string"
+            },
+            {
+              "id": "c1185d85-6934-412d-a1c0-9375066a795d",
+              "name": "from_me",
+              "value": "={{ $json.body.payload.fromMe }}",
+              "type": "string"
+            },
+            {
+              "id": "5bb0a47a-1f65-4f53-a666-975db5c9aba5",
+              "name": "msg_type",
+              "value": "={{ $json.body.payload.type \n 'chat' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2016,
+        368
+      ],
+      "id": "d19eaeb7-1a00-41f9-ba23-3b394e5f6ad5",
+      "name": "Extract Message"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "a6c8f41e-3d0e-4d29-b7d3-2b8297f79078",
+                    "leftValue": "={{ $json.intent }}",
+                    "rightValue": "order_flow",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "order_flow"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "d4892391-471f-4604-a4b2-e53b7ec8bbfe",
+                    "leftValue": "={{ $json.intent }}",
+                    "rightValue": "order_confirm",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "order_confirm"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "f2db7e1e-2610-455b-9681-896fb8089bf3",
+                    "leftValue": "={{ $json.intent }}",
+                    "rightValue": "cart_view",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "cart_view"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "e06a2ec8-3ef4-4fab-abbb-caa0bb6dcba4",
+                    "leftValue": "={{ $json.intent }}",
+                    "rightValue": "cart_clear",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "cart_clear"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "f0c1bcce-ac6e-4374-b5e7-5986f8d3ef30",
+                    "leftValue": "={{ $json.intent }}",
+                    "rightValue": "cart_remove",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "cart_remove"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "afb6a29d-bbe9-4069-acd8-66c82264c611",
+                    "leftValue": "={{ $json.intent }}",
+                    "rightValue": "checkout",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "checkout"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "3ec4bba8-9796-4774-a5c0-6592fcf8a5e9",
+                    "leftValue": "={{ $json.intent }}",
+                    "rightValue": "buy",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "buy"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "15f129a0-c5c2-456e-acff-49a4c6ef3a16",
+                    "leftValue": "={{ $json.intent }}",
+                    "rightValue": "installation",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "installation"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "a982cc5f-5ce2-4088-9453-f0642486cf68",
+                    "leftValue": "={{ $json.intent }}",
+                    "rightValue": "quote_flow",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "quote_flow"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "bbacb553-d0f5-4609-b12b-18d8723895b1",
+                    "leftValue": "={{ $json.intent }}",
+                    "rightValue": "quote_feedback",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "quote_feedback"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "86391665-a56e-4572-bc2e-c12af27907e2",
+                    "leftValue": "={{ $json.intent }}",
+                    "rightValue": "escalated_human",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "escalated_human"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "44b3a9df-02ec-456b-a962-5c865606990f",
+                    "leftValue": "={{ $json.intent }}",
+                    "rightValue": "support",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "support"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "f04a0b14-121f-4659-abe0-9525afce242c",
+                    "leftValue": "={{ $json.intent }}",
+                    "rightValue": "ignore",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "ignore"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "680d4a8a-b035-4447-82fc-df2ece3bbd9c",
+                    "leftValue": "={{ $json.intent }}",
+                    "rightValue": "media_unsupported",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "media_unsupported"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "fb5a8b81-7dd1-4334-a4ea-6e663e0ef52f",
+                    "leftValue": "={{ $json.intent }}",
+                    "rightValue": "clear_escalation",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "clear_escalation"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "59132d94-268a-459a-bfa7-1413c460f0af",
+                    "leftValue": "={{ $json.intent }}",
+                    "rightValue": "human_takeover",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "human_takeover"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        192,
+        400
+      ],
+      "id": "485c7663-d4c9-4157-bda5-cf3ff4b240ca",
+      "name": "Intent Router",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a7e1d51d-bac0-4158-8caf-c3c9b3a2d394",
+              "name": "reply",
+              "value": "={{ $json.cart.length > 0 ? 'Your Cart (' + $json.cart.length + ' items):\\n\\n' + $json.cart.map((c, i) => (i+1) + '. *' + c.name + '* x' + c.qty + ' — PKR ' + (c.price * c.qty)).join('\\n') + '\\n\\nTotal: PKR ' + $json.cart.reduce((s, c) => s + c.price * c.qty, 0) + '\\n\\nType *checkout* to place your order.\\nType *remove [number]* to remove an item.\\nType *clear cart* to empty cart.\\nType *menu* to return to main menu.' : 'Your cart is empty.\\n\\nType *1* to browse products.\\nType *buy [product name]* to add to cart.\\nType *menu* to return to main menu.' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1072,
+        -176
+      ],
+      "id": "fd421c03-6182-42fd-b73c-6f33d36b0adb",
+      "name": "Handle Cart View"
+    },
+    {
+      "parameters": {
+        "jsCode": "const translated = $json.translated;\nlet cart = [...$json.cart];\nconst idx = parseInt(translated.replace('remove ', '')) - 1;\n\nlet reply = '';\n\nif (isNaN(idx) || idx < 0 || idx >= cart.length) {\n  reply = 'I couldn\\'t find that item in your cart.\\n\\nTo adjust quantity:\\n1. Type *remove [exact product name]* to remove it\\n2. Then type *buy [product name]* to add it back\\n\\nType *cart* to view your current cart.\\nType *menu* to return to main menu.';\n} else {\n  const removed = cart.splice(idx, 1)[0];\n  const cartSummary = cart.length > 0\n    ? 'Your Cart:\\n\\n' + cart.map((c, i) => `${i+1}. *${c.name}* x${c.qty} — PKR ${c.price * c.qty}`).join('\\n') + '\\n\\nTotal: PKR ' + cart.reduce((s, c) => s + c.price * c.qty, 0)\n    : 'Your cart is empty.';\n  reply = `Removed *${removed.name}* from cart.\\n\\n${cartSummary}\\n\\nType *checkout* to order.\\nType *menu* to return to main menu.`;\n}\n\nreturn [{json: {...$json, reply, cart}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1344,
+        16
+      ],
+      "id": "b1c25ed1-9006-42e2-b280-4f6063c0dcb6",
+      "name": "Handle Cart Remove"
+    },
+    {
+      "parameters": {
+        "jsCode": "const cart = $json.cart;\nlet reply = '';\nlet orderState = null;\n\nif (cart.length === 0) {\n  reply = 'Your cart is empty! Add products first.\\n\\nType *1* to browse products.\\nType *buy [product name]* to add to cart.';\n} else {\n  const cartSummary = cart.map((c, i) => `${i+1}. *${c.name}* x${c.qty} — PKR ${c.price * c.qty}`).join('\\n');\n  const total = cart.reduce((s, c) => s + c.price * c.qty, 0);\n  reply = `Your Cart:\\n\\n${cartSummary}\\n\\nTotal: PKR ${total}\\n\\nLet's complete your order!\\n\\nPlease enter your full name:\\n(Type *menu* to cancel)`;\n  orderState = 'collecting_name';\n}\n\nreturn [{json: {...$json, reply, orderState: orderState || $json.orderState, orderData: {}}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1472,
+        112
+      ],
+      "id": "49b6a998-fc3b-4477-9069-0775d6fdd61e",
+      "name": "Handle Checkout"
+    },
+    {
+      "parameters": {
+        "jsCode": "const translated = $json.translated;\nconst products = $json.products;\nlet cart = [...$json.cart];\nlet lastProduct = $json.lastProduct;\n\n// Strip filler words to find product hint\nconst noise = ['yes','yeah','yep','sure','ok','i','want','to','buy','wanna','now','please','order','purchase','the','a','an','it','this','that','get','me','can','will','would','like','let','do','some','one','more','add'];\nconst hint = translated.split(' ').filter(w => w.length > 1 && !noise.includes(w)).join(' ').trim();\n\nlet target = null;\nlet reply = '';\n\nif (hint.length > 2) {\n  // Exact match\n  target = products.find(p => p.product_name && p.product_name.toLowerCase() === hint);\n  \n  if (!target) {\n    // Strong match — all words in name\n    const words = hint.split(' ').filter(w => w.length > 2);\n    const strong = products.filter(p => {\n      const name = (p.product_name || '').toLowerCase();\n      return words.length > 0 && words.every(w => name.includes(w));\n    });\n    \n    if (strong.length === 1) {\n      target = strong[0];\n    } else if (strong.length > 1) {\n      const list = strong.slice(0, 8).map((p, i) => `${i+1}. *${p.product_name}*\\n   PKR ${p.price} | ${p.stock}\\n   ${p.product_url}`).join('\\n\\n');\n      reply = `Found *${strong.length} products* matching \"${hint}\":\\n\\n${list}\\n\\nType *buy [exact product name]* to add to cart.\\nType *menu* to return to main menu.`;\n      return [{json: {...$json, reply, cart, lastProduct: strong[0]}}];\n    } else {\n      // Broad match\n      const broad = products.filter(p => {\n        const text = [p.product_name||'',p.category||'',p.keywords||'',p.description||''].join(' ').toLowerCase();\n        return words.every(w => text.includes(w));\n      });\n      if (broad.length === 1) target = broad[0];\n      else if (broad.length > 1) {\n        const list = broad.slice(0, 8).map((p, i) => `${i+1}. *${p.product_name}*\\n   PKR ${p.price} | ${p.stock}\\n   ${p.product_url}`).join('\\n\\n');\n        reply = `Found *${broad.length} products* matching \"${hint}\":\\n\\n${list}\\n\\nType *buy [exact product name]* to add to cart.\\nType *menu* to return to main menu.`;\n        return [{json: {...$json, reply, cart, lastProduct: broad[0]}}];\n      }\n    }\n  }\n}\n\n// If no product in message, use last viewed\nif (!target && lastProduct) target = lastProduct;\n\nif (!target) {\n  reply = 'Please tell me which product you want!\\n\\nType *catalogue* to keep browsing.\\nType *menu* to return to main menu.';\n  return [{json: {...$json, reply, cart}}];\n}\n\n// Stock check\nconst stock = (target.stock || '').toLowerCase();\nconst inStock = stock.includes('in stock') || stock.includes('available') || stock.includes('yes');\nif (!inStock) {\n  reply = `Sorry, *${target.product_name}* is currently out of stock.\\n\\nFor restock updates:\\n📞 WhatsApp: +923010756404\\n\\nType *catalogue* to browse available products.\\nType *menu* to return to main menu.`;\n  return [{json: {...$json, reply, cart}}];\n}\n\n// Add to cart\nconst existing = cart.find(c => c.name === target.product_name);\nif (existing) { existing.qty += 1; } else { cart.push({name: target.product_name, price: target.price, qty: 1}); }\n\nconst total = cart.reduce((s, c) => s + c.price * c.qty, 0);\nconst cartLines = cart.map((c, i) => `${i+1}. *${c.name}* x${c.qty} — PKR ${c.price * c.qty}`).join('\\n');\n\nreply = `Added *${target.product_name}* (PKR ${target.price}) to cart!\\n\\nYour Cart (${cart.length} items):\\n\\n${cartLines}\\n\\nTotal: PKR ${total}\\n\\nType *catalogue* to keep browsing.\\nType *checkout* when you're ready.\\nType *menu* to return to main menu.`;\n\nreturn [{json: {...$json, reply, cart, lastProduct: target}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1616,
+        224
+      ],
+      "id": "99106a25-9b36-480b-9276-bb5bbe704d17",
+      "name": "Handle Buy"
+    },
+    {
+      "parameters": {
+        "jsCode": "const message = $json.message;\nconst lowerMsg = $json.lowerMsg;\nconst translated = $json.translated || lowerMsg || message;\nlet orderState = $json.orderState;\nlet orderData = {...$json.orderData};\nlet cart = typeof $json.cart === 'string' ? JSON.parse($json.cart || '[]') : (Array.isArray($json.cart) ? $json.cart : []);\nconst company = $json.company;\nlet reply = '';\n\n// Escape detection — let user break out of order flow\nconst lowerCheck = (lowerMsg || message || '').toLowerCase();\nconst escapeWords = ['menu', 'cancel', 'back', 'remove', 'cart', 'clear', 'wapis', 'nahi', 'stop'];\nif (escapeWords.some(w => lowerCheck.includes(w)) || lowerCheck.includes('only want') || lowerCheck.includes('change') || lowerCheck.includes('dont want') || lowerCheck.includes(\"don't want\") || lowerCheck.includes('not three') || lowerCheck.includes('not two') || lowerCheck.includes('wrong')) {\n  return [{json: {...$json, reply: 'Order paused. Your cart is still saved.\\n\\nType *cart* to view/edit your cart.\\nType *remove [product name]* to remove items.\\nType *checkout* to restart checkout.\\nType *menu* to return to main menu.', orderState: null, orderData: {}}}];\n}\n\n// Validation helpers\nfunction validateName(n) {\n  const t = n.trim();\n  if (t.length < 3) return {valid: false, msg: 'Name is too short. Please enter your full name (first and last):'};\n  if (/^\\d+$/.test(t)) return {valid: false, msg: 'That looks like a number. Please enter your full name:'};\n  if (/[!@#$%^&*()_+=\\[\\]{}|\\\\:\";\\'<>?,./]/.test(t)) return {valid: false, msg: 'Please enter your name without special characters:'};\n  return {valid: true};\n}\nfunction validatePhone(ph) {\n  const c = ph.replace(/[\\s\\-\\(\\)]/g, '');\n  if (/^03\\d{9}$/.test(c)) return {valid: true, formatted: c};\n  if (/^\\+923\\d{9}$/.test(c)) return {valid: true, formatted: c};\n  if (/^923\\d{9}$/.test(c)) return {valid: true, formatted: '+' + c};\n  return {valid: false};\n}\nfunction validateAddress(a) {\n  if (a.trim().length < 10) return {valid: false, msg: 'Address is too short. Please include city, area, and street.\\nExample: Lahore, DHA Phase 5, Street 12, House 45'};\n  return {valid: true};\n}\n\n// ── COLLECTING NAME ──\nif (orderState === 'collecting_name') {\n  const check = validateName(message);\n  if (!check.valid) {\n    reply = `${check.msg}\\n(Type *menu* to cancel order)`;\n    return [{json: {...$json, reply, orderState, orderData, cart}}];\n  }\n  orderData.name = message.trim();\n  orderState = 'collecting_phone';\n  reply = `Got it ${orderData.name}!\\n\\nPlease share your WhatsApp number:\\n(Format: 03XX-XXXXXXX)\\n(Type *menu* to cancel order)`;\n}\n// ── COLLECTING PHONE ──\nelse if (orderState === 'collecting_phone') {\n  const check = validatePhone(message);\n  if (!check.valid) {\n    reply = `That doesn't look like a valid Pakistani phone number.\\n\\nPlease enter in format: 03XX-XXXXXXX\\nExample: 03001234567\\n(Type *menu* to cancel order)`;\n    return [{json: {...$json, reply, orderState, orderData, cart}}];\n  }\n  orderData.phone = check.formatted;\n  orderState = 'collecting_address';\n  reply = `Phone saved: ${check.formatted}\\n\\nPlease share your delivery address:\\n(Include city, area, street — be specific for delivery)\\nExample: Lahore, DHA Phase 5, Street 12, House 45\\n(Type *menu* to cancel order)`;\n}\n// ── COLLECTING ADDRESS ──\nelse if (orderState === 'collecting_address') {\n  const check = validateAddress(message);\n  if (!check.valid) {\n    reply = `${check.msg}\\n(Type *menu* to cancel order)`;\n    return [{json: {...$json, reply, orderState, orderData, cart}}];\n  }\n  orderData.address = message.trim();\n  orderState = 'collecting_payment';\n  reply = `Address saved!\\n\\nChoose payment method:\\n\\n1 - Cash on Delivery (COD)\\n2 - Online Payment (Bank Transfer)\\n(Type *menu* to cancel order)`;\n}\n// ── COLLECTING PAYMENT ──\nelse if (orderState === 'collecting_payment') {\n  if (lowerMsg === '1' || lowerMsg.includes('cod') || lowerMsg.includes('cash')) {\n    orderData.payment = 'Cash on Delivery';\n  } else if (lowerMsg === '2' || lowerMsg.includes('online') || lowerMsg.includes('bank')) {\n    orderData.payment = 'Online Payment';\n  } else {\n    reply = 'Please type *1* for Cash on Delivery or *2* for Online Payment:\\n(Type *menu* to cancel order)';\n    return [{json: {...$json, reply, orderState, orderData, cart}}];\n  }\n  // Show confirmation\n  orderState = 'confirming_order';\n  const cartLines = cart.map((c, i) => `${i+1}. ${c.name} x${c.qty} — PKR ${c.price * c.qty}`).join('\\n');\n  const total = cart.reduce((s, c) => s + c.price * c.qty, 0);\n  reply = `Please review your order:\\n\\n${cartLines}\\n\\nTotal: PKR ${total}\\nName: ${orderData.name}\\nPhone: ${orderData.phone}\\nAddress: ${orderData.address}\\nPayment: ${orderData.payment}\\n\\nType *confirm* to place this order.\\nType *menu* to cancel.`;\n}\n\nreturn [{json: {...$json, reply, orderState, orderData, cart}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        816,
+        -384
+      ],
+      "id": "06f3477c-0a32-4a3f-a72f-8a27bff84469",
+      "name": "Handle Order Flow"
+    },
+    {
+      "parameters": {
+        "jsCode": "const translated = $json.translated || $json.lowerMsg || $json.message;\nlet orderState = $json.orderState;\nlet orderData = {...$json.orderData};\nlet cart = [...$json.cart];\nconst company = $json.company;\nlet reply = '';\nlet orderComplete = false;\nlet orderRecord = null;\nlet customerRecord = null;\n\nconst yesWords = ['confirm','yes','haan','han','ji','jee','bilkul','theek','thik','ok','sahi','y'];\n\nif (yesWords.some(w => translated === w || translated.includes(w))) {\n  // Place order\n  const orderId = 'WM-' + Date.now().toString().slice(-6);\n  const items = cart.map(c => `${c.name} x${c.qty}`).join(', ');\n  const total = cart.reduce((s, c) => s + c.price * c.qty, 0);\n\n  const paymentNote = orderData.payment === 'Online Payment'\n    ? `\\n\\nBank Details:\\nBank: ${company.bank_name}\\nAccount No: ${company.bank_account}\\nIBAN: ${company.bank_iban}\\nTitle: ${company.bank_title}\\n\\nSend screenshot on WhatsApp to confirm.`\n    : '';\n\n  reply = `Order Placed!\\n\\nOrder ID: *${orderId}*\\nProducts: ${items}\\nTotal: PKR ${total}\\nName: ${orderData.name}\\nPhone: ${orderData.phone}\\nAddress: ${orderData.address}\\nPayment: ${orderData.payment}${paymentNote}\\n\\nWe'll contact you within 24 hours!\\nThank you for choosing WaltonMarket!\\n\\nType *menu* to continue shopping.`;\n\n  orderRecord = {\n    order_id: orderId,\n    session_id: $json.sessionId,\n    customer_name: orderData.name,\n    phone: orderData.phone,\n    address: orderData.address,\n    products: items,\n    total_price: total,\n    payment_method: orderData.payment,\n    status: 'Pending'\n  };\n\n  orderComplete = true; \n  // Build customer record for saving\n  const customerRecord = {\n    phone: orderData.phone,\n    name: orderData.name,\n    address: orderData.address\n  };\n  orderState = null;\n  orderData = {};\n  cart = [];\n} else {\n  // Cancel\n  orderState = null;\n  orderData = {};\n  const cartSummary = cart.length > 0\n    ? 'Your cart is still saved.\\n\\n' + cart.map((c, i) => `${i+1}. *${c.name}* x${c.qty} — PKR ${c.price * c.qty}`).join('\\n')\n    : '';\n  reply = `Order cancelled. ${cartSummary}\\n\\nType *checkout* to try again.\\nType *menu* to return to main menu.`;\n}\n\nreturn [{json: {...$json, reply, orderState, orderData, cart, orderComplete, orderRecord, customerRecord}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        944,
+        -272
+      ],
+      "id": "76b48bbc-6641-425b-920c-c9df96773126",
+      "name": "Handle Order Confirm"
+    },
+    {
+      "parameters": {
+        "jsCode": "if (!$json.sessionId && !$json.reply) return [];\n\nconst sessionId = $json.sessionId || $('Build AI Prompt').first().json.sessionId;\nconst bap = $('Build AI Prompt').first().json;\n\nconst existingHistory = Array.isArray($json.history) ? $json.history : (Array.isArray(bap.history) ? bap.history : []);\nconst updatedHistory = [...existingHistory];\nupdatedHistory.push({role: 'user', text: $json.message || bap.message, ts: Date.now()});\nupdatedHistory.push({role: 'assistant', text: $json.reply, ts: Date.now()});\nconst trimmedHistory = updatedHistory.slice(-20);\n\nconst esc = (v) => typeof v === 'string' ? v.replace(/'/g, \"''\") : JSON.stringify(v || null).replace(/'/g, \"''\");\nconst orderState = $json.orderState !== undefined ? $json.orderState : (bap.orderState || null);\n\nconst sqlQuery = `INSERT INTO sessions (session_id, history, order_state, order_data, last_product, cart, current_page)\nVALUES (\n  '${esc(sessionId)}',\n  '${esc(trimmedHistory)}'::jsonb,\n  ${orderState ? \"'\" + esc(orderState) + \"'\" : 'NULL'},\n  '${esc($json.orderData || bap.orderData || {})}'::jsonb,\n  '${esc($json.lastProduct || bap.lastProduct || null)}'::jsonb,\n  '${esc(Array.isArray($json.cart) ? $json.cart : (Array.isArray(bap.cart) ? bap.cart : []))}'::jsonb,\n  ${$json.currentPage || bap.currentPage || 0}\n)\nON CONFLICT (session_id) DO UPDATE SET\n  history = EXCLUDED.history,\n  order_state = EXCLUDED.order_state,\n  order_data = EXCLUDED.order_data,\n  last_product = EXCLUDED.last_product,\n  cart = EXCLUDED.cart,\n  current_page = EXCLUDED.current_page`;\n\nreturn [{json: {\n  sqlQuery,\n  reply: $json.reply,\n  orderComplete: $json.orderComplete || false,\n  orderRecord: $json.orderRecord || null,\n  customerPhone: $json.orderComplete ? ($json.orderRecord?.phone || null) : null,\n  customerName: $json.orderComplete ? ($json.orderRecord?.customer_name || null) : null,\n  customerAddress: $json.orderComplete ? ($json.orderRecord?.address || null) : null\n}}];\n```\n\n**Change Save Handler Session** back to **Execute Query**. Set the query to:\n```\n{{ $json.sqlQuery }}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2272,
+        224
+      ],
+      "id": "acc5e1e1-ec35-4fb8-9ae8-46797ef84972",
+      "name": "Save Session",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "jsCode": "// ============================================\n// BUILD AI PROMPT — COMPLETE FIXED VERSION\n// Fixes: echo filter, voice msgs, escalation cooldown, number context\n// ============================================\n\nconst message = $('Extract Message').first().json.message;\nconst lowerMsg = $('Extract Message').first().json.lower_msg;\nconst sessionId = $('Extract Message').first().json.session_id;\nconst chatId = $('Extract Message').first().json.chat_id;\n\n// ============ FILTER 1: Skip junk messages ============\n// Broadcast, status, empty, or missing payload\nif (!sessionId || sessionId.includes('broadcast') || sessionId.includes('status')) {\n  return [{json: { skipAI: true, intent: 'ignore', reply: '', message: '', sessionId: sessionId || '', chatId: chatId || '' }}];\n}\n\n// ============ FILTER 2: Handle own outgoing messages ============\nconst fromMe = $('Extract Message').first().json.from_me;\nif (fromMe === true || fromMe === 'true') {\n  return [{json: { skipAI: true, intent: 'ignore', reply: '', message: '', sessionId, chatId }}];\n}\n\n// ============ FILTER 3: Handle voice/media messages ============\nconst msgType = $('Extract Message').first().json.msg_type;\nif (!message && (msgType === 'ptt' || msgType === 'audio' || msgType === 'video' || msgType === 'image' || msgType === 'document' || msgType === 'sticker')) {\n  const mediaReply = msgType === 'ptt' || msgType === 'audio'\n    ? '🎤 Maaf kijiye, main voice messages samajhne mein abhi qaabil nahi hoon. Apna sawaal text mein likhein please! 😊\\n\\nType *menu* for main menu.'\n    : '📎 Maaf kijiye, main is waqt sirf text messages samajh sakta hoon. Apna sawaal text mein likhein please! 😊\\n\\nType *menu* for main menu.';\n  return [{json: {\n    skipAI: true,\n    intent: 'media_unsupported',\n    reply: mediaReply,\n    message: '', lowerMsg: '', sessionId, chatId,\n    session: {}, history: [], orderState: null, orderData: {},\n    lastProduct: null, cart: [], currentPage: 0,\n    quoteState: null, quoteData: {},\n    products: [], company: {}, isNewSession: false\n  }}];\n}\n\n// Skip completely empty messages\nif (!message) {\n  return [{json: { skipAI: true, intent: 'ignore', reply: '', message: '', sessionId, chatId }}];\n}\n\n// ============ SESSION ============\nconst sessionRows = $('Fetch Session').all();\nconst session = sessionRows.length > 0 ? sessionRows[0].json : null;\n\nlet history = typeof session?.history === 'string' ? JSON.parse(session.history) : (session?.history || []);\nlet orderState = session?.order_state || null;\nlet orderData = typeof session?.order_data === 'string' ? JSON.parse(session.order_data) : (session?.order_data || {});\nlet lastProduct = typeof session?.last_product === 'string' ? JSON.parse(session.last_product) : (session?.last_product || null);\nlet cart = typeof session?.cart === 'string' ? JSON.parse(session.cart) : (session?.cart || []);\nlet currentPage = session?.current_page || 0;\nlet quoteState = session?.quote_state || null;\nlet quoteData = typeof session?.quote_data === 'string' ? JSON.parse(session.quote_data) : (session?.quote_data || {});\n\n// ============ ESCALATION CHECK (30-min cooldown) ============\nconst escalatedAt = session?.escalated_at ? new Date(session.escalated_at) : null;\nif (escalatedAt) {\n  const minutesSinceEscalation = (Date.now() - escalatedAt.getTime()) / 60000;\n  if (minutesSinceEscalation < 30) {\n    // Allow \"menu\" to bypass escalation\n    if (lowerMsg === 'menu') {\n      return [{json: {\n        skipAI: true,\n        intent: 'clear_escalation',\n        reply: 'How can I help you today?\\n1️⃣ Buy Smart Home Products\\n2️⃣ Learn about Smart Home Automation\\n3️⃣ Smart Home Installation\\n4️⃣ Talk to Human Support\\n\\n📦 Type any product name to search.\\n🛒 Type *buy [product name]* to add to cart.\\n🧾 Type *cart* to view your cart.\\n✅ Type *checkout* to place your order.\\n\\nAap Urdu mein bhi baat kar saktay hain!',\n        message, lowerMsg, sessionId, chatId,\n        session: session || {},\n        history, orderState, orderData, lastProduct, cart, currentPage,\n        quoteState, quoteData,\n        products: [], company: {}, isNewSession: false\n      }}];\n    } else {\n      // Still in cooldown — completely silent\n      return [{json: {\n        skipAI: true,\n        intent: 'ignore',\n        reply: '',\n        message, lowerMsg, sessionId, chatId,\n        session: session || {},\n        history, orderState, orderData, lastProduct, cart, currentPage,\n        quoteState, quoteData,\n        products: [], company: {}, isNewSession: false\n      }}];\n    }\n  }\n  // Cooldown expired or menu typed — clear escalation in Prepare AI Save\n}\n\n// ============ PRODUCTS ============\nconst products = $('Fetch Products').all().map(i => i.json);\nconst productList = products.map(p => {\n  const bankPrice = Math.round(p.price * 0.95);\n  return `${p.id}|${p.product_name}|${p.price}|${bankPrice}|${p.stock}|${p.category}|${p.keywords || ''}|${p.condition || 'New'}`;\n}).join('\\n');\n\n// ============ COMPANY INFO ============\nconst companyRows = $('Fetch Company Info').all();\nconst company = {};\nfor (const row of companyRows) {\n  company[row.json.key] = row.json.value;\n}\n\n// ============ CUSTOMER DATA ============\nconst customerRows = $('Fetch Customer').all();\nconst customer = customerRows.length > 0 && customerRows[0].json.phone ? customerRows[0].json : null;\n\n// ============ QUOTE HISTORY ============\nlet customerQuoteHistory = '';\nlet customerQuotes = [];\ntry {\n  const quoteRows = $('Fetch Customer Quotes').all();\n  if (quoteRows.length > 0) {\n    customerQuotes = quoteRows.map(r => r.json).filter(q => q.quote_ref);\n    if (customerQuotes.length > 0) {\n      customerQuoteHistory = customerQuotes.map(q =>\n        `Ref: ${q.quote_ref} | Date: ${q.created_at ? new Date(q.created_at).toLocaleDateString('en-GB') : 'N/A'} | City: ${q.city || 'N/A'} | ${q.marlas || '?'} Marla | Total: PKR ${q.grand_total ? Number(q.grand_total).toLocaleString() : 'N/A'} | Feedback: ${q.feedback || 'none'}`\n      ).join('\\n');\n    }\n  }\n} catch(e) { customerQuoteHistory = ''; }\n\n// ============ RETURNING CUSTOMER DETECTION ============\nlet returningCustomerInfo = 'New customer — first visit.';\nlet customerName = '';\n\nif (customer && customer.name) {\n  customerName = customer.name;\n  returningCustomerInfo = `RETURNING CUSTOMER: Name: ${customer.name}, Total Orders: ${customer.total_orders || 0}, Last Order: ${customer.last_order_date || 'N/A'}`;\n}\n\nif (customerQuotes.length > 0) {\n  const latestQuote = customerQuotes[0];\n  if (!customerName && latestQuote.customer_name) {\n    customerName = latestQuote.customer_name;\n  }\n  const quoteInfo = `Has ${customerQuotes.length} previous quotation(s). Latest: ${latestQuote.quote_ref} for PKR ${latestQuote.grand_total ? Number(latestQuote.grand_total).toLocaleString() : 'N/A'} in ${latestQuote.city || 'N/A'}.`;\n  \n  if (customer && customer.name) {\n    returningCustomerInfo += ` | QUOTE HISTORY: ${quoteInfo}`;\n  } else {\n    returningCustomerInfo = `RETURNING CUSTOMER (from quotes): Name: ${customerName || 'Unknown'}, ${quoteInfo}`;\n  }\n  \n  const negativeFeedback = customerQuotes.find(q => q.feedback === 'no' || q.feedback === 'No');\n  if (negativeFeedback) {\n    returningCustomerInfo += ` | WARNING: Previous negative feedback on ${negativeFeedback.quote_ref}`;\n  }\n}\n\n// ============ CONVERSATION HISTORY ============\nconst recentHistory = Array.isArray(history) ? history.slice(-2).map(h => `${h.role}: ${h.text}`).join('\\n') : '';\n\n// ============ ACTIVE FLOW SKIPS ============\nif (orderState && (orderState.startsWith('collecting_') || orderState === 'confirming_order')) {\n  return [{json: {\n    skipAI: true,\n    intent: orderState === 'confirming_order' ? 'order_confirm' : 'order_flow',\n    message, lowerMsg, sessionId, chatId,\n    session: session || {},\n    history, orderState, orderData, lastProduct, cart, currentPage,\n    products, company, isNewSession: !session\n  }}];\n}\n\nif (quoteState === 'collecting_customer_info' || quoteState === 'collecting_house_details') {\n  return [{json: {\n    skipAI: true,\n    intent: 'quote_flow',\n    message, lowerMsg, sessionId, chatId,\n    session: session || {},\n    history, orderState, orderData, lastProduct, cart, currentPage,\n    quoteState, quoteData,\n    products, company, isNewSession: !session\n  }}];\n}\n\nif (quoteState === 'quote_feedback_pending' || quoteState === 'quote_feedback_detail') {\n  return [{json: {\n    skipAI: true,\n    intent: 'quote_feedback',\n    message, lowerMsg, sessionId, chatId,\n    session: session || {},\n    history, orderState, orderData, lastProduct, cart, currentPage,\n    quoteState, quoteData,\n    products, company, isNewSession: !session\n  }}];\n}\n// ============ NUMBER SELECTION PRE-CHECK ============\nlet enhancedMessage = message;\nconst isJustNumber = /^\\d{1,2}$/.test(message.trim());\nif (isJustNumber && history.length > 0) {\n  const lastAssistant = [...history].reverse().find(h => h.role === 'assistant');\n  if (lastAssistant && lastAssistant.text) {\n    const hasNumberedList = /\\d+\\.\\s+\\w+.*(?:Price|PKR)/i.test(lastAssistant.text);\n    const hasMenu = /1️⃣|2️⃣|3️⃣|4️⃣/.test(lastAssistant.text);\n    if (hasNumberedList && !hasMenu) {\n      enhancedMessage = `Customer selected item number ${message} from the product list shown above. Show full details of that specific product.`;\n    }\n  }\n}\n// ============ GEMINI SYSTEM PROMPT ============\nconst systemPrompt = `You are Arik, WaltonMarket's WhatsApp AI assistant for smart home products in Okara, Pakistan.\nYou speak English and Roman Urdu fluently. Match the customer's language.\n\nTASK: Analyze the customer message and respond with JSON only.\n\nPRODUCTS DATABASE (id|name|price|bank_transfer_price|stock|category|keywords|condition):\n${productList}\n\nCOMPANY INFO:\n${['company_name','phone','email','address','location','physical_store','delivery_policy','return_policy','payment_methods','bank_name','bank_account','bank_iban','bank_title','working_hours','service_areas','warranty'].map(k => company[k] ? `${k}: ${company[k]}` : '').filter(Boolean).join('\\n')}\n\n${returningCustomerInfo}\n\nCUSTOMER QUOTE HISTORY:\n${customerQuoteHistory || 'No previous quotations.'}\n\nRETURNING CUSTOMER GREETING RULE:\n- If RETURNING CUSTOMER info exists above, greet by name and mention last quote.\n- After greeting, ALWAYS show the full menu.\n\nCART: ${JSON.stringify(cart)}\nLAST PRODUCT: ${lastProduct ? lastProduct.product_name : 'none'}\n\nRECENT CONVERSATION HISTORY:\n${recentHistory || 'No previous messages.'}\n\nCUSTOMER MESSAGE: \"${enhancedMessage}\"\n\nCRITICAL CONTEXT RULES:\n- MENU NUMBER RULE (MOST IMPORTANT): If the IMMEDIATELY PREVIOUS assistant message contained the menu with \"1️⃣ Buy Smart Home Products, 2️⃣ Learn about Smart Home Automation, 3️⃣ Smart Home Installation, 4️⃣ Talk to Human Support\", then:\n  * \"1\" = intent \"catalogue\" (show products)\n  * \"2\" = intent \"learn\"\n  * \"3\" = intent \"installation\"\n  * \"4\" = intent \"support\"\n  DO NOT treat these numbers as product searches when sent right after a menu!\n- PRODUCT LIST NUMBER RULE: If the IMMEDIATELY PREVIOUS assistant message showed a NUMBERED PRODUCT LIST (like \"1. Smart Bulb, 2. Fan Switch...\"), ONLY THEN does a number refer to a product from that list.\n- If in doubt whether a number is a menu option or product — check the conversation history. If the last message had emoji numbers (1️⃣ 2️⃣ 3️⃣ 4️⃣), it's a MENU.\n- CONDITION QUERIES: When customer asks about \"condition\" of a product, check the 'condition' field from the product database and tell them (New/Used/Branded/Refurbished etc). Do NOT treat \"condition\" as a product search.\n- NEVER use phone numbers or addresses from conversation history as company contact info.\n- LOCATION RULE: WaltonMarket HAS a physical store. NEVER say \"no physical store\" or \"online only\". Always use 'physical_store' value from COMPANY INFO.\n\nINTENT RULES:\n- greeting: hello, hi, hey, salam, assalamu alaikum, aoa, kya haal hai, kaise ho, bhai, G, etc.\n- menu: menu, help, options\n- product_search: any product name, misspelled product, \"I want...\", \"do you have...\", \"dikhao\", \"batao\", or a NUMBER referencing a product from a NUMBERED PRODUCT LIST shown in the previous message\n- buy: \"buy\", \"buy [product]\", \"khareedna\", \"chahiye\", \"lena hai\". If just \"buy\" with no product, use LAST PRODUCT.\n- catalogue: \"catalogue\", \"catalog\", \"show all\", \"all products\", OR \"1\" when previous message was the MENU\n- cart_view: \"cart\", \"my cart\", \"tokri\"\n- cart_clear: \"clear cart\", \"empty cart\"\n- cart_remove: \"remove [product]\"\n- checkout: \"checkout\", \"order\", \"bill karo\"\n- learn: \"learn\", \"what is smart home\", OR \"2\" when previous message was the MENU\n- installation: \"install\", \"setup\", \"quotation\", \"quote\", \"marla\", \"smart home for my house\", \"free quotation\", OR \"3\" when previous message was the MENU\n- support: \"support\", \"complaint\", \"talk to human\", \"human agent\", \"insaan se baat\", \"help me\", \"I need help\", \"bhai help\", OR \"4\" when previous message was the MENU\n- company_info: location, contact, delivery, payment, warranty, return, about, condition (when asking about product condition)\n\nGREETING RESPONSE FORMAT (intent=greeting):\nMirror the customer's greeting, greet returning customers by name if known.\nAfter greeting, ALWAYS include this exact menu:\n\"I'm Arik, your smart home assistant at WaltonMarket! 🏠\\\\n\\\\nWaltonMarket specializes in smart home automation products that make your life easier.\\\\n\\\\nHow can I help you today?\\\\n1️⃣ Buy Smart Home Products\\\\n2️⃣ Learn about Smart Home Automation\\\\n3️⃣ Smart Home Installation\\\\n4️⃣ Talk to Human Support\\\\n\\\\n📦 Type any product name to search.\\\\n🛒 Type *buy [product name]* to add to cart.\\\\n🧾 Type *cart* to view your cart.\\\\n✅ Type *checkout* to place your order.\\\\n\\\\nAap Urdu mein bhi baat kar saktay hain!\"\n\nPRODUCT SEARCH RESPONSE FORMAT (intent=product_search):\nInclude: product name, price (PKR), bank transfer price, stock status, condition, short description.\nShow BOTH prices: \"Price: PKR [price]\\\\nBank Transfer Price: PKR [bank_transfer_price] (5% discount!)\"\nIf product has condition info (Used/Branded etc), ALWAYS mention it clearly.\nEnd with: \"Type *buy* to add to cart.\\\\nType *menu* to return to main menu.\"\nHandle typos intelligently. ONLY recommend products from the PRODUCTS DATABASE. Never invent products.\n\nCATALOGUE RESPONSE FORMAT (intent=catalogue):\nShow 5 products at a time, numbered. Include name, price, bank transfer price, stock, condition.\nEnd with: \"Type *next* for more products.\\\\nType the product number for details.\\\\nType *buy [product name]* to add to cart.\\\\nType *menu* to return to main menu.\"\n\nMENU RESPONSE FORMAT (intent=menu):\nShow the same menu as greeting but start with \"How can I help you today?\" instead of a greeting.\n\nINSTALLATION RESPONSE FORMAT (intent=installation):\nReply ONLY with: \"Great! Let me prepare a smart home quotation for you. 🏠\"\nSet intent to \"installation\".\n\nSUPPORT RESPONSE FORMAT (intent=support):\n\"🧑‍💼 Aapka request humari team tak pahuncha diya gaya hai. Jald hi koi agent aapse contact karega.\\\\n\\\\nWhatsApp: ${company['phone'] || '+923010756404'}\\\\nEmail: ${company['email'] || 'thewaltonmarket@gmail.com'}\\\\nWorking hours: ${company['working_hours'] || 'Mon-Sat, 9am-6pm PKT'}\\\\n\\\\nPlease wait for a response. \\\\n\\\\nType *menu* agar aap Arik se baat karna chahein.\"\n\nLOCATION RESPONSE FORMAT (intent=company_info):\nUse 'physical_store' and 'location' values from COMPANY INFO. Include Google Maps link.\n\nFOR ALL OTHER INTENTS:\nGive a helpful, short WhatsApp-friendly reply (under 500 chars).\nAlways end with \"Type *menu* to return to main menu.\"\n\nRESPOND WITH THIS EXACT JSON STRUCTURE:\n{\n  \"intent\": \"one of the intents above\",\n  \"reply\": \"your WhatsApp-formatted reply\",\n  \"matchedProductId\": null or product id number,\n  \"matchedProductName\": null or \"exact product name from database\"\n}\n\nJSON ONLY. No markdown backticks. No explanation outside JSON.`;\n\nreturn [{json: {\n  skipAI: false,\n  systemPrompt,\n  message, lowerMsg, sessionId, chatId,\n  session: session || {},\n  history, orderState, orderData, lastProduct, cart, currentPage,\n  quoteState, quoteData,\n  products, company, isNewSession: !session\n}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -752,
+        368
+      ],
+      "id": "2badbed6-a405-4526-bcad-a982a62a1046",
+      "name": "Build AI Prompt"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a6902666-433e-4583-90fd-d13d3b7c8fd4",
+              "leftValue": "={{ $json.skipAI }}",
+              "rightValue": "={{true}}",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -528,
+        368
+      ],
+      "id": "8f1cbcd3-75e5-4244-8c91-e52d8e86e6d2",
+      "name": "Skip AI",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $json;\n\n// Call Gemini API\nconst response = await this.helpers.httpRequest({\n  method: 'POST',\n  url: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',\n  headers: { 'Content-Type': 'application/json' },\n  qs: { key: 'YOUR_GEMINI_API_KEY' },\n  body: JSON.stringify({\n    contents: [{ parts: [{ text: prev.systemPrompt }] }],\n    generationConfig: { temperature: 0.2, responseMimeType: 'application/json', thinkingConfig: { thinkingBudget: 0 } }\n  })\n});\n\n// Parse Gemini response\nlet aiResponse;\ntry {\n  const raw = response.candidates[0].content.parts[0].text;\n  aiResponse = JSON.parse(raw);\n} catch(e) {\n  return [{json: {\n    ...prev,\n    intent: 'menu',\n    reply: 'Sorry, I didn\\'t understand that. Type *menu* for options.'\n  }}];\n}\n\n// Find matched product\nlet matchedProduct = prev.lastProduct;\nif (aiResponse.matchedProductId) {\n  const found = prev.products.find(p => p.id === aiResponse.matchedProductId);\n  if (found) matchedProduct = found;\n}\nif (!matchedProduct && aiResponse.matchedProductName) {\n  const name = aiResponse.matchedProductName.toLowerCase();\n  const found = prev.products.find(p => p.product_name.toLowerCase() === name);\n  if (found) matchedProduct = found;\n}\n\nreturn [{json: {\n  intent: aiResponse.intent || 'menu',\n  message: prev.message,\n  lowerMsg: prev.lowerMsg,\n  translated: prev.lowerMsg,\n  sessionId: prev.sessionId,\n  session: prev.session,\n  history: prev.history,\n  orderState: prev.orderState,\n  orderData: prev.orderData,\n  lastProduct: matchedProduct,\n  cart: prev.cart,\n  currentPage: prev.currentPage,\n  products: prev.products,\n  company: prev.company,\n  isNewSession: prev.isNewSession,\n  reply: aiResponse.reply || ''\n}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -320,
+        544
+      ],
+      "id": "776698e2-8114-4eb0-b418-b6394deb98f9",
+      "name": "Call Gemini + Process",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM sessions WHERE session_id = '{{ $json.session_id }}' LIMIT 1",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -1808,
+        368
+      ],
+      "id": "42d27ca8-25f4-4e11-95cb-bc8ac8e13175",
+      "name": "Fetch Session",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "YOUR_POSTGRES_CREDENTIAL_ID",
+          "name": "WaltonMarket Hetzner DB"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM products ORDER BY id",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -1392,
+        368
+      ],
+      "id": "0a47cd14-ff86-4ba6-8aec-b51ee3ac87d7",
+      "name": "Fetch Products",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "YOUR_POSTGRES_CREDENTIAL_ID",
+          "name": "WaltonMarket Hetzner DB"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM company_info ORDER BY id",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -1184,
+        368
+      ],
+      "id": "8920786e-9d18-4e51-8ed9-f0db6964cbfb",
+      "name": "Fetch Company Info",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "YOUR_POSTGRES_CREDENTIAL_ID",
+          "name": "WaltonMarket Hetzner DB"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// ============================================\n// PREPARE AI SAVE — FIXED VERSION\n// Fixes: last_product update when Gemini matches a product\n// ============================================\n\nconst prev = $json;\nconst sessionId = prev.sessionId || $('Build AI Prompt').first().json.sessionId;\nconst bap = $('Build AI Prompt').first().json;\nconst existingHistory = Array.isArray(prev.history) ? prev.history : (Array.isArray(bap.history) ? bap.history : []);\nconst updatedHistory = [...existingHistory];\nupdatedHistory.push({role: 'user', text: prev.message, ts: Date.now()});\nupdatedHistory.push({role: 'assistant', text: prev.reply, ts: Date.now()});\nconst trimmedHistory = updatedHistory.slice(-20);\nconst esc = (v) => typeof v === 'string' ? v.replace(/'/g, \"''\") : JSON.stringify(v || null).replace(/'/g, \"''\");\nconst orderState = prev.orderState !== undefined ? prev.orderState : (bap.orderState || null);\n\n// UPDATE last_product when Gemini matches a product\nlet lastProduct = prev.lastProduct || bap.lastProduct || null;\nif (prev.matchedProductId && prev.matchedProductName) {\n  const products = bap.products || [];\n  const matched = products.find(p => p.id == prev.matchedProductId);\n  if (matched) {\n    lastProduct = matched;\n  } else {\n    lastProduct = { id: prev.matchedProductId, product_name: prev.matchedProductName };\n  }\n}\n\n// Clear escalation if cooldown expired (auto-resume bot)\nconst escalatedAt = bap.session?.escalated_at || null;\nlet clearEscalation = false;\nif (escalatedAt) {\n  const mins = (Date.now() - new Date(escalatedAt).getTime()) / 60000;\n  if (mins >= 30 || bap.lowerMsg === 'menu') clearEscalation = true;\n}\n\nconst sqlQuery = `INSERT INTO sessions (session_id, history, order_state, order_data, last_product, cart, current_page${clearEscalation ? ', escalated_at' : ''})\nVALUES (\n  '${esc(sessionId)}',\n  '${esc(trimmedHistory)}'::jsonb,\n  ${orderState ? \"'\" + esc(orderState) + \"'\" : 'NULL'},\n  '${esc(prev.orderData || bap.orderData || {})}'::jsonb,\n  '${esc(lastProduct)}'::jsonb,\n  '${esc(Array.isArray($json.cart) ? $json.cart : (Array.isArray(bap.cart) ? bap.cart : []))}'::jsonb,\n  ${prev.currentPage || bap.currentPage || 0}${clearEscalation ? ', NULL' : ''}\n)\nON CONFLICT (session_id) DO UPDATE SET\n  history = EXCLUDED.history,\n  order_state = EXCLUDED.order_state,\n  order_data = EXCLUDED.order_data,\n  last_product = EXCLUDED.last_product,\n  cart = EXCLUDED.cart,\n  current_page = EXCLUDED.current_page${clearEscalation ? ',\\n  escalated_at = NULL' : ''}`;\nreturn [{json: {\n  sqlQuery,\n  reply: prev.reply\n}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        848,
+        1152
+      ],
+      "id": "f113be4c-7a96-426d-a090-d3ded72ad8a2",
+      "name": "Prepare AI Save"
+    },
+    {
+      "parameters": {
+        "jsCode": "const reply = $('Prepare AI Save').first().json.reply;\nreturn [{json: {reply}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1280,
+        1152
+      ],
+      "id": "a0e8bbe8-ade3-4f2a-8359-caf29a05c3ad",
+      "name": "Return AI Reply"
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $('Save Session').first().json;\n\nlet finalReply = prev.reply;\nif (!finalReply) {\n  try { finalReply = $('Call Gemini + Process').first().json.reply; } catch(e) {}\n}\nif (!finalReply) finalReply = 'Type *menu* for options.';\nreturn [{json: {reply: finalReply}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3360,
+        224
+      ],
+      "id": "5cbd7c4f-ca83-446c-8b2e-f6b3b347bc00",
+      "name": "Save Order + Reply"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO customers (phone, name, address, total_orders, last_order_date)\nVALUES ($1, $2, $3, 1, NOW())\nON CONFLICT (phone) DO UPDATE SET\n  name = EXCLUDED.name,\n  address = EXCLUDED.address,\n  total_orders = customers.total_orders + 1,\n  last_order_date = NOW()",
+        "options": {
+          "queryReplacement": "={{ $('Save Session').first().json.customerPhone }}, {{ $('Save Session').first().json.customerName }}, {{ $('Save Session').first().json.customerAddress }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        3152,
+        0
+      ],
+      "id": "b588fd72-677b-45a2-832a-521a31ea91e3",
+      "name": "Save Customer",
+      "credentials": {
+        "postgres": {
+          "id": "YOUR_POSTGRES_CREDENTIAL_ID",
+          "name": "WaltonMarket Hetzner DB"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3bee3367-4ca7-42c5-8489-c748ebe46694",
+              "leftValue": "={{ $('Save Session').first().json.orderComplete }}",
+              "rightValue": "={{ true }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2960,
+        224
+      ],
+      "id": "32a97224-c589-468a-9b9c-9419c5e2cb8b",
+      "name": "Order Placed?"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $json.sqlQuery }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2480,
+        224
+      ],
+      "id": "d45dd658-a925-4548-ac0d-9556e973b4d7",
+      "name": "Save Handler Session",
+      "credentials": {
+        "postgres": {
+          "id": "YOUR_POSTGRES_CREDENTIAL_ID",
+          "name": "WaltonMarket Hetzner DB"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $json.sqlQuery }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1072,
+        1152
+      ],
+      "id": "818c858e-26f3-4c12-8bf2-c93a133ef2bb",
+      "name": "Save Session DB",
+      "credentials": {
+        "postgres": {
+          "id": "YOUR_POSTGRES_CREDENTIAL_ID",
+          "name": "WaltonMarket Hetzner DB"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM customers WHERE phone = '{{ $json.session_id }}' LIMIT 1",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -1600,
+        368
+      ],
+      "id": "0dfaaec4-36a7-4a6d-9765-519f8c6cfe39",
+      "name": "Fetch Customer",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "YOUR_POSTGRES_CREDENTIAL_ID",
+          "name": "WaltonMarket Hetzner DB"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{json: {...$json, reply: 'Cart cleared.\\n\\nType *catalogue* to browse products.\\nType *menu* to return to main menu.', cart: []}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1216,
+        -80
+      ],
+      "id": "b6954abe-2c55-4f6f-9c0d-06e690f6e000",
+      "name": "Handle Cart Clear"
+    },
+    {
+      "parameters": {
+        "jsCode": "// QUOTATION HANDLER — State Machine\n// Handles 3 states: start -> collecting_customer_info -> collecting_house_details -> calculator\n\nconst buildData = $('Build AI Prompt').first().json;\nconst message = buildData.message;\nconst sessionId = buildData.sessionId;\nconst company = buildData.company || {};\nconst session = buildData.session || {};\n\n// Get quote state from session\nconst quoteState = session.quote_state || null;\nconst quoteData = typeof session.quote_data === 'string'\n  ? JSON.parse(session.quote_data)\n  : (session.quote_data || {});\n\n// STATE 0: No quoteState -> ask customer info\nif (!quoteState || quoteState === 'null') {\n  return [{json: {\n    action: 'reply_and_save',\n    reply: '🏠 *Smart Home Quotation*\\n\\nBilkul! Pehle apni details bhejein — kisi bhi format mein:\\n\\n📝 Naam\\n📱 Phone number\\n📍 Sheher & area\\n\\nMisaal ke taur par:\\nAhmad Ali\\n03001234567\\nLahore, DHA Phase 5\\n\\n_Type *menu* to cancel._',\n    newQuoteState: 'collecting_customer_info',\n    newQuoteData: {},\n    sessionId,\n    proceedToCalculator: false\n  }}];\n}\n\n// STATE 1: collecting_customer_info -> parse name/phone/address\nif (quoteState === 'collecting_customer_info') {\n\n  if (/^(menu|cancel|wapas|back)$/i.test(message.trim())) {\n    return [{json: {\n      action: 'reply_and_save',\n      reply: 'Quotation cancelled. Type *menu* to return to main menu.',\n      newQuoteState: null,\n      newQuoteData: {},\n      sessionId,\n      proceedToCalculator: false\n    }}];\n  }\n\n  // Phone extraction — find phone number anywhere in message\n  const phoneRegex = /(0\\d{9,10}|\\+92\\d{10}|92\\d{10})/;\n  const phoneStructured = message.match(/phone\\s*[:\\-]\\s*([0-9+\\s]{10,14})/i);\n  const phoneInline = message.match(phoneRegex);\n  const rawPhone = phoneStructured?.[1]?.trim() || phoneInline?.[0] || null;\n\n  // Name extraction — everything BEFORE the phone number on same line\n  const nameLabeled = message.match(/name\\s*[:\\-]\\s*(.+?)(?:\\n|$)/i);\n  let name = nameLabeled?.[1]?.trim() || null;\n\n  if (!name && rawPhone) {\n    // Find where phone appears and take text before it as name\n    const beforePhone = message.substring(0, message.indexOf(rawPhone)).trim();\n    // Clean up: take last line before phone\n    const beforeLines = beforePhone.split('\\n').map(l => l.trim()).filter(Boolean);\n    if (beforeLines.length > 0) {\n      // Last non-empty line before phone = name\n      name = beforeLines[beforeLines.length - 1].trim();\n    }\n  }\n\n  if (!name) {\n    // Fallback: first line that isn't a phone number\n    const lines = message.split('\\n').map(l => l.trim()).filter(Boolean);\n    for (const line of lines) {\n      if (!phoneRegex.test(line) && line.length > 1) {\n        name = line;\n        break;\n      }\n    }\n  }\n\n  // Address extraction — everything AFTER the phone number\n  const addressLabeled = message.match(/address\\s*[:\\-]\\s*(.+?)(?:\\n|$)/i);\n  let address = addressLabeled?.[1]?.trim() || '';\n\n  if (!address && rawPhone) {\n    const phoneIdx = message.indexOf(rawPhone);\n    if (phoneIdx !== -1) {\n      const afterPhone = message.substring(phoneIdx + rawPhone.length).trim();\n      // Remove leading punctuation/newlines\n      address = afterPhone.replace(/^[,\\s\\n]+/, '').split('\\n')[0].trim();\n    }\n  }\n\n  if (!name || !rawPhone) {\n    return [{json: {\n      action: 'reply_and_save',\n      reply: '❌ Naam aur phone number zaroor chahiye. Aise bhejein:\\n\\nAhmad Ali\\n03001234567\\nLahore, DHA\\n\\n_Type *menu* to cancel._',\n      newQuoteState: 'collecting_customer_info',\n      newQuoteData: quoteData,\n      sessionId,\n      proceedToCalculator: false\n    }}];\n  }\n\n  const updatedQuoteData = {\n    customerName: name,\n    customerPhone: rawPhone,\n    customerAddress: address\n  };\n\n  return [{json: {\n    action: 'reply_and_save',\n    reply: '✅ Shukriya, ' + name + '!\\n\\nAb apne ghar ki details share karein:\\n\\n1️⃣ Sheher & area\\n2️⃣ Ghar ka size (marlas) & manzilain (stories/floors)\\n3️⃣ Poora ghar automate karna hai ya sirf kuch areas?\\n4️⃣ Rooms ki tadaad: Bedrooms | Bathrooms | Kitchen | Living Room | Drawing Room | Garage\\n5️⃣ Andaza: Lights | Fans | Switches\\n6️⃣ Kya chahiye? (yes/no): Smart Curtains | Smart Door Locks | Human Presence Sensors\\n7️⃣ Smart Touch Panels: no | 4-gang (PKR 14,500) | alexa (PKR 32,500)\\n8️⃣ Ghar zair-e-taameer hai? (wiring chahiye?)\\n\\nSaari details ek message mein bhejein! 🏡',\n    newQuoteState: 'collecting_house_details',\n    newQuoteData: updatedQuoteData,\n    sessionId,\n    proceedToCalculator: false\n  }}];\n}\n\n// STATE 2: collecting_house_details -> parse & pass to calculator\nif (quoteState === 'collecting_house_details') {\n\n  if (/^(menu|cancel|wapas|back)$/i.test(message.trim())) {\n    return [{json: {\n      action: 'reply_and_save',\n      reply: 'Quotation cancelled. Type *menu* to return to main menu.',\n      newQuoteState: null,\n      newQuoteData: {},\n      sessionId,\n      proceedToCalculator: false\n    }}];\n  }\n\n  const msg = message;\n\n  // City\n  const cityPatterns = [\n    /(?:^|\\n)\\s*1\\s*[:\\.\\-]\\s*([A-Za-z\\s]{3,40}?)(?:\\n|,|$)/m,\n    /(lahore|karachi|islamabad|rawalpindi|faisalabad|multan|okara|sahiwal|gujranwala|sialkot|peshawar|quetta)/i\n  ];\n  let city = 'Not specified';\n  for (const p of cityPatterns) {\n    const m = msg.match(p);\n    if (m) { city = m[1].trim(); break; }\n  }\n\n  // Size\n  const marlaMatch = msg.match(/(\\d+)\\s*marla/i);\n  const marlas = marlaMatch ? parseInt(marlaMatch[1]) : 0;\n  const stories = msg.match(/double\\s*stor/i) ? 2\n    : msg.match(/triple\\s*stor/i) ? 3\n    : msg.match(/(\\d+)\\s*stor(?:y|ies|ey)/i) ? parseInt(msg.match(/(\\d+)\\s*stor/i)[1])\n    : msg.match(/(\\d+)\\s*manzil/i) ? parseInt(msg.match(/(\\d+)\\s*manzil/i)[1])\n    : 1;\n\n  // Rooms\n  const num = (regex) => { const m = msg.match(regex); return m ? parseInt(m[1]) : 0; };\n  const rooms = {\n    bedrooms:     num(/(\\d+)\\s*bed(?:room)?/i),\n    bathrooms:    num(/(\\d+)\\s*bath(?:room)?/i),\n    kitchens:     num(/(\\d+)\\s*kitchen/i),\n    livingRooms:  num(/(\\d+)\\s*living/i),\n    drawingRooms: num(/(\\d+)\\s*drawing/i),\n    garages:      num(/(\\d+)\\s*garage/i)\n  };\n\n  // Devices\n  const lights   = num(/(\\d+)\\+?\\s*light/i);\n  const fans     = num(/(\\d+)\\+?\\s*fan/i);\n  const switches = num(/(\\d+)\\+?\\s*switch(?:es|board)?/i);\n\n  // Extras (negation-aware)\n  const wantsExtra = (keyword) => {\n    const negated = new RegExp('(?:no|nahi|nay|don\\'t|dont)[^\\\\n]{0,20}' + keyword + '|' + keyword + '[^\\\\n]{0,20}(?:nahi|no)', 'i');\n    const positive = new RegExp(keyword, 'i');\n    return positive.test(msg) && !negated.test(msg);\n  };\n\n  const extras = {\n    smartCurtains:   wantsExtra('curtain'),\n    smartLocks:      wantsExtra('(?:door\\\\s*)?lock'),\n    presenceSensors: wantsExtra('presence\\\\s*sensor'),\n    wiring:          /under\\s*construct|zair.e.taameer|wiring.*yes|yes.*wiring/i.test(msg)\n  };\n\n  // Touch panel type detection\n  // Check for alexa version first, then 4-gang, then no\n  let touchPanelType = 'none';\n  if (/alexa/i.test(msg)) {\n    touchPanelType = 'alexa';\n  } else if (/4.gang|4gang|touch panel.*yes|yes.*touch panel|touch.*panel/i.test(msg) && !/no.*touch|touch.*no/i.test(msg)) {\n    touchPanelType = '4gang';\n  } else if (/touch/i.test(msg) && !/no.*touch|touch.*no/i.test(msg)) {\n    touchPanelType = '4gang'; // default to cheaper if just \"touch\" mentioned\n  }\n\n  const mainRooms = rooms.bedrooms + rooms.livingRooms + rooms.drawingRooms;\n  const extraCounts = {\n    curtains:        extras.smartCurtains   ? Math.max(mainRooms * 2, 2) : 0,\n    locks:           extras.smartLocks      ? 2 : 0,\n    touchPanels:     touchPanelType !== 'none' ? Math.max(Math.ceil(mainRooms / 2), 1) : 0,\n    presenceSensors: extras.presenceSensors ? Math.max(mainRooms, 1) : 0,\n    touchPanelType\n  };\n\n  const finalQuoteData = {\n    ...quoteData,\n    city, marlas, stories,\n    rooms, devices: { lights, fans, switches },\n    extras, extraCounts,\n    rawMessage: msg\n  };\n\n  return [{json: {\n    action: 'proceed_to_calculator',\n    reply: null,\n    newQuoteState: null,\n    newQuoteData: {},\n    sessionId,\n    proceedToCalculator: true,\n    quoteData: finalQuoteData\n  }}];\n}\n\n// FALLBACK\nreturn [{json: {\n  action: 'reply_and_save',\n  reply: 'Kuch masla aaya. Type *menu* to start over.',\n  newQuoteState: null,\n  newQuoteData: {},\n  sessionId,\n  proceedToCalculator: false\n}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        992,
+        512
+      ],
+      "id": "19eba60e-ada2-4aa7-9dc3-dc27a64cf654",
+      "name": "Quotation Handler"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "d107623e-5e9d-4700-8a57-af538c0e9baf",
+              "leftValue": "={{ $json.proceedToCalculator }}",
+              "rightValue": "={{ true }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1168,
+        480
+      ],
+      "id": "caff1af4-eebf-4b4d-8485-9de44efcd610",
+      "name": "Proceed to Calculator?"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO sessions (session_id, quote_state, quote_data)\nVALUES ($1, $2, $3::jsonb)\nON CONFLICT (session_id) DO UPDATE SET\nquote_state = EXCLUDED.quote_state,\nquote_data = EXCLUDED.quote_data",
+        "options": {
+          "queryReplacement": "=$1: {{ $json.sessionId }}\n$2: {{ $json.newQuoteState }}\n$3: {{ JSON.stringify($json.newQuoteData) }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1664,
+        544
+      ],
+      "id": "42b74e26-37b2-482a-b0fb-5b70f0278f98",
+      "name": "Save Quote Session",
+      "credentials": {
+        "postgres": {
+          "id": "YOUR_POSTGRES_CREDENTIAL_ID",
+          "name": "WaltonMarket Hetzner DB"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://waha:3000/api/sendText",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Api-Key",
+              "value": "YOUR_WAHA_API_KEY"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"chatId\": \"{{ $('Extract Message').first().json.chat_id }}\", \"text\": {{ JSON.stringify($('Quotation Handler').first().json.reply) }}, \"session\": \"default\"}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2352,
+        592
+      ],
+      "id": "fc8a79a6-1660-4f30-aaaf-c0cfc0496c26",
+      "name": "Send Quote Reply"
+    },
+    {
+      "parameters": {
+        "jsCode": "// CALCULATE QUOTE — Room-based pricing calculator\n// Calculates per room type, not raw device counts\n\nconst d = $input.first().json.quoteData;\nconst sessionId = $input.first().json.sessionId;\n\nconst {\n  customerName, customerPhone, customerAddress,\n  city, marlas, stories, rooms, devices, extras, extraCounts\n} = d;\n\n// ─────────────────────────────────────────────\n// PRODUCT PRICING — matches actual DB\n// ─────────────────────────────────────────────\nconst P = {\n  bulb_rgb:         { product: 2450, install: 500,  name: 'Smart Wifi LED Bulb RGB 13W' },\n  fan_combined:     { product: 7650, install: 500,  name: 'Smart Wifi 4+Gang Fan Switch (Lights + Fan)' },\n  fan_standalone:   { product: 4650, install: 500,  name: 'Smart Wifi Fan Switch' },\n  switch_4gang:     { product: 4450, install: 500,  name: '4 Gang Wifi Touch Smart Switch' },\n  switch_2gang:     { product: 3950, install: 500,  name: '2 Gang Wifi Touch Smart Switch' },\n  wall_socket:      { product: 6199, install: 500,  name: 'Smart Wifi Wall Socket 13A USB/C-Type' },\n  touch_panel_4g:   { product: 14500, install: 2000, name: 'Smart Touch Panel Control With 4 Gang Switch' },\n  touch_panel_alexa:{ product: 32500, install: 2000, name: 'Smart Touch Panel Control With Alexa' },\n  curtain_motor:    { product: 0,    install: 3000, name: 'Smart Curtain Motor', note: 'Product price to be confirmed' },\n  smart_lock:       { product: 0,    install: 3000, name: 'Smart Door Lock', note: 'Product price to be confirmed' },\n  presence_sensor:  { product: 7450, install: 500,  name: 'Smart Wifi Human Presence Sensor (5.8Ghz)' },\n};\n\n// ─────────────────────────────────────────────\n// ITEM ACCUMULATOR\n// ─────────────────────────────────────────────\nconst itemMap = {}; // key -> {pricing, qty, category}\n\nconst addItem = (key, pricing, qty, category) => {\n  if (!qty || qty <= 0) return;\n  if (itemMap[key]) {\n    itemMap[key].qty += qty;\n  } else {\n    itemMap[key] = { pricing, qty, category };\n  }\n};\n\n// ─────────────────────────────────────────────\n// LIGHTS DISTRIBUTION\n// Total lights from customer / total rooms = per room count\n// ─────────────────────────────────────────────\nconst totalRooms = (rooms.bedrooms || 0) + (rooms.livingRooms || 0) +\n  (rooms.drawingRooms || 0) + (rooms.kitchens || 0) +\n  (rooms.bathrooms || 0) + (rooms.garages || 0) || 1;\n\nconst totalLights = devices.lights || 0;\nconst lightsPerRoom = totalLights > 0 ? Math.ceil(totalLights / totalRooms) : 0;\n\n// ─────────────────────────────────────────────\n// PER ROOM CALCULATIONS\n// ─────────────────────────────────────────────\n\n// BEDROOMS: 4+Gang Fan Switch (combined lights+fan) + 2x wall sockets + lights\nconst bedrooms = rooms.bedrooms || 0;\nif (bedrooms > 0) {\n  addItem('fan_combined', P.fan_combined, bedrooms, 'Bedroom: Fan + Light Switch');\n  addItem('wall_socket',  P.wall_socket,  bedrooms * 2, 'Bedroom: Bedside Wall Sockets');\n  if (lightsPerRoom > 0) addItem('bulb_rgb', P.bulb_rgb, bedrooms * lightsPerRoom, 'Bedroom: Smart Bulbs');\n}\n\n// LIVING ROOMS: 4-gang switch + standalone fan + lights\nconst livingRooms = rooms.livingRooms || 0;\nif (livingRooms > 0) {\n  addItem('switch_4gang_living', P.switch_4gang, livingRooms, 'Living Room: 4-Gang Switch Board');\n  addItem('fan_standalone', P.fan_standalone, livingRooms, 'Living Room: Fan Switch');\n  if (lightsPerRoom > 0) addItem('bulb_rgb', P.bulb_rgb, livingRooms * lightsPerRoom, 'Living Room: Smart Bulbs');\n}\n\n// DRAWING ROOMS: 4-gang switch + standalone fan + lights\nconst drawingRooms = rooms.drawingRooms || 0;\nif (drawingRooms > 0) {\n  addItem('switch_4gang_drawing', P.switch_4gang, drawingRooms, 'Drawing Room: 4-Gang Switch Board');\n  addItem('fan_standalone', P.fan_standalone, drawingRooms, 'Drawing Room: Fan Switch');\n  if (lightsPerRoom > 0) addItem('bulb_rgb', P.bulb_rgb, drawingRooms * lightsPerRoom, 'Drawing Room: Smart Bulbs');\n}\n\n// KITCHENS: 2-gang switch + 1 wall socket + lights\nconst kitchens = rooms.kitchens || 0;\nif (kitchens > 0) {\n  addItem('switch_2gang_kitchen', P.switch_2gang, kitchens, 'Kitchen: 2-Gang Switch Board');\n  addItem('wall_socket', P.wall_socket, kitchens, 'Kitchen: Wall Socket');\n  if (lightsPerRoom > 0) addItem('bulb_rgb', P.bulb_rgb, kitchens * lightsPerRoom, 'Kitchen: Smart Bulbs');\n}\n\n// BATHROOMS: 2-gang switch + lights\nconst bathrooms = rooms.bathrooms || 0;\nif (bathrooms > 0) {\n  addItem('switch_2gang_bath', P.switch_2gang, bathrooms, 'Bathroom: 2-Gang Switch Board');\n  if (lightsPerRoom > 0) addItem('bulb_rgb', P.bulb_rgb, bathrooms * lightsPerRoom, 'Bathroom: Smart Bulbs');\n}\n\n// GARAGES: 2-gang switch\nconst garages = rooms.garages || 0;\nif (garages > 0) {\n  addItem('switch_2gang_garage', P.switch_2gang, garages, 'Garage: 2-Gang Switch Board');\n}\n\n// ─────────────────────────────────────────────\n// EXTRAS\n// ─────────────────────────────────────────────\nif (extraCounts.curtains > 0) {\n  addItem('curtain_motor', P.curtain_motor, extraCounts.curtains, 'Smart Curtains');\n}\nif (extraCounts.locks > 0) {\n  addItem('smart_lock', P.smart_lock, extraCounts.locks, 'Smart Door Locks');\n}\nif (extraCounts.touchPanels > 0) {\n  const panelPricing = (extraCounts.touchPanelType === 'alexa') ? P.touch_panel_alexa : P.touch_panel_4g;\n  addItem('touch_panel', panelPricing, extraCounts.touchPanels, 'Smart Touch Panels');\n}\nif (extraCounts.presenceSensors > 0) {\n  addItem('presence_sensor', P.presence_sensor, extraCounts.presenceSensors, 'Human Presence Sensors');\n}\n\n// ─────────────────────────────────────────────\n// BUILD FINAL ITEMS LIST + SUBTOTAL\n// ─────────────────────────────────────────────\nconst items = [];\nlet subtotal = 0;\n\nfor (const key of Object.keys(itemMap)) {\n  const { pricing, qty, category } = itemMap[key];\n  const unitTotal = pricing.product + pricing.install;\n  const lineTotal = qty * unitTotal;\n  items.push({\n    name: pricing.name,\n    category,\n    qty,\n    productPrice: pricing.product,\n    installPrice: pricing.install,\n    unitTotal,\n    lineTotal,\n    note: pricing.note || null\n  });\n  subtotal += lineTotal;\n}\n\n// ─────────────────────────────────────────────\n// DISCOUNT TIERS\n// ─────────────────────────────────────────────\nlet discountRate = 0;\nlet discountLabel = '';\nif (subtotal > 200000) {\n  discountRate = 0.15;\n  discountLabel = '15% Discount (Order above PKR 200,000)';\n} else if (subtotal > 100000) {\n  discountRate = 0.10;\n  discountLabel = '10% Discount (Order above PKR 100,000)';\n}\n\nconst discountAmount = Math.round(subtotal * discountRate);\nconst grandTotal = subtotal - discountAmount;\n\n// ─────────────────────────────────────────────\n// FORMATTING\n// ─────────────────────────────────────────────\nconst fmt = (n) => n.toLocaleString('en-US');\nconst quoteRef = 'WM-' + Date.now().toString().slice(-6);\nconst now = new Date();\nconst date = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });\n\n// ─────────────────────────────────────────────\n// WHATSAPP TEXT SUMMARY\n// ─────────────────────────────────────────────\nlet text = '🏠 *WaltonMarket Smart Home Quotation*\\n';\ntext += '━━━━━━━━━━━━━━━━━━━━\\n';\ntext += '📋 *Ref:* ' + quoteRef + '   📅 ' + date + '\\n';\ntext += '👤 *Customer:* ' + customerName + '\\n';\ntext += '📱 *Phone:* ' + customerPhone + '\\n';\nif (customerAddress) text += '📍 *Address:* ' + customerAddress + '\\n';\ntext += '🏡 *Property:* ' + (marlas > 0 ? marlas + ' Marla' : '') + (stories > 1 ? ', ' + stories + ' Stories' : ', 1 Story') + ' — ' + city + '\\n';\n\n// Room summary\nconst roomParts = [];\nif (bedrooms > 0) roomParts.push(bedrooms + ' Bedroom' + (bedrooms > 1 ? 's' : ''));\nif (bathrooms > 0) roomParts.push(bathrooms + ' Bathroom' + (bathrooms > 1 ? 's' : ''));\nif (kitchens > 0) roomParts.push(kitchens + ' Kitchen' + (kitchens > 1 ? 's' : ''));\nif (livingRooms > 0) roomParts.push(livingRooms + ' Living Room' + (livingRooms > 1 ? 's' : ''));\nif (drawingRooms > 0) roomParts.push(drawingRooms + ' Drawing Room' + (drawingRooms > 1 ? 's' : ''));\nif (garages > 0) roomParts.push(garages + ' Garage' + (garages > 1 ? 's' : ''));\nif (roomParts.length > 0) text += '🚪 *Rooms:* ' + roomParts.join(' | ') + '\\n';\ntext += '━━━━━━━━━━━━━━━━━━━━\\n\\n';\n\ntext += '*📦 QUOTATION BREAKDOWN*\\n\\n';\n\nfor (const item of items) {\n  text += '▪️ *' + item.name + '*\\n';\n  if (item.note) text += '   _⚠️ ' + item.note + '_\\n';\n  text += '   Qty: ' + item.qty + ' × PKR ' + fmt(item.unitTotal) + '\\n';\n  text += '   _(Product: PKR ' + fmt(item.productPrice) + ' + Install: PKR ' + fmt(item.installPrice) + ')_\\n';\n  text += '   = *PKR ' + fmt(item.lineTotal) + '*\\n\\n';\n}\n\ntext += '━━━━━━━━━━━━━━━━━━━━\\n';\ntext += 'Subtotal: PKR ' + fmt(subtotal) + '\\n';\nif (discountRate > 0) {\n  text += '🎉 *' + discountLabel + '*\\n';\n  text += 'Discount: -PKR ' + fmt(discountAmount) + '\\n';\n}\ntext += '\\n💰 *GRAND TOTAL: PKR ' + fmt(grandTotal) + '*\\n';\ntext += '━━━━━━━━━━━━━━━━━━━━\\n\\n';\ntext += '⚠️ _System-generated estimate. Final pricing may vary based on actual site requirements._\\n';\ntext += '🔧 _Wiring for under-construction properties quoted separately after site survey._\\n';\ntext += '📄 _PDF quotation available on request._\\n\\n';\ntext += '📞 *Confirm or discuss:* +923010756404\\n';\ntext += '📍 *Visit:* 2nd Floor, Al-Husain Plaza, M.A. Jinnah Road, Okara\\n';\ntext += '🗺️ https://maps.app.goo.gl/uSmAJPZrEqJbN7Yh6\\n\\n';\ntext += '_Type *menu* to return to main menu._';\n\n// ─────────────────────────────────────────────\n// OUTPUT\n// ─────────────────────────────────────────────\nreturn [{json: {\n  textQuote: text,\n  quoteRef,\n  date,\n  items,\n  subtotal,\n  discountRate,\n  discountAmount,\n  grandTotal,\n  discountLabel,\n  customerName,\n  customerPhone,\n  customerAddress: customerAddress || '',\n  city,\n  marlas: marlas || 0,\n  stories: stories || 1,\n  rooms,\n  devices,\n  extraCounts,\n  sessionId,\n  quoteData: d\n}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1376,
+        384
+      ],
+      "id": "63cbb847-6221-4576-a993-585037f43ada",
+      "name": "Calculate Quote"
+    },
+    {
+      "parameters": {
+        "jsCode": "// GENERATE PDF HTML — Professional quotation template\n// Input: output from calculate_quote.js\n// Output: { html, filename, sessionId, customerPhone, textQuote }\n\nconst d = $input.first().json;\nconst {\n  quoteRef, date, customerName, customerPhone, customerAddress,\n  city, marlas, stories, items, subtotal,\n  discountRate, discountAmount, grandTotal, discountLabel,\n  rooms, devices, sessionId, textQuote\n} = d;\n\nconst fmt = (n) => 'PKR ' + n.toLocaleString('en-US');\n\n// Build items table rows\nconst itemRows = items.map(item => `\n  <tr>\n    <td>\n      <strong>${item.name}</strong>\n      ${item.note ? `<br><span class=\"note-text\">⚠️ ${item.note}</span>` : ''}\n    </td>\n    <td class=\"center\">${item.qty}</td>\n    <td class=\"right\">${fmt(item.productPrice)}</td>\n    <td class=\"right\">${fmt(item.installPrice)}</td>\n    <td class=\"right\">${fmt(item.unitTotal)}</td>\n    <td class=\"right amount\">${fmt(item.lineTotal)}</td>\n  </tr>\n`).join('');\n\n// Room summary for display\nconst roomSummary = [\n  rooms.bedrooms    > 0 ? `${rooms.bedrooms} Bedroom${rooms.bedrooms > 1 ? 's' : ''}` : '',\n  rooms.bathrooms   > 0 ? `${rooms.bathrooms} Bathroom${rooms.bathrooms > 1 ? 's' : ''}` : '',\n  rooms.kitchens    > 0 ? `${rooms.kitchens} Kitchen${rooms.kitchens > 1 ? 's' : ''}` : '',\n  rooms.livingRooms > 0 ? `${rooms.livingRooms} Living Room${rooms.livingRooms > 1 ? 's' : ''}` : '',\n  rooms.drawingRooms > 0 ? `${rooms.drawingRooms} Drawing Room${rooms.drawingRooms > 1 ? 's' : ''}` : '',\n  rooms.garages     > 0 ? `${rooms.garages} Garage${rooms.garages > 1 ? 's' : ''}` : '',\n].filter(Boolean).join(' | ');\n\nconst deviceSummary = [\n  devices.lights   > 0 ? `${devices.lights} Lights` : '',\n  devices.fans     > 0 ? `${devices.fans} Fans` : '',\n  devices.switches > 0 ? `${devices.switches} Switches` : '',\n].filter(Boolean).join(' | ');\n\nconst html = `<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\">\n<style>\n  * { margin: 0; padding: 0; box-sizing: border-box; }\n  body { font-family: 'Arial', sans-serif; font-size: 12px; color: #333; background: #fff; }\n\n  /* HEADER */\n  .header { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: #fff; padding: 28px 35px; }\n  .header-top { display: flex; justify-content: space-between; align-items: flex-start; }\n  .brand h1 { font-size: 24px; font-weight: 700; letter-spacing: 0.5px; }\n  .brand p { font-size: 11px; opacity: 0.75; margin-top: 3px; }\n  .quote-meta { text-align: right; }\n  .quote-meta .quote-label { font-size: 18px; font-weight: 700; color: #e8c96a; letter-spacing: 2px; }\n  .quote-meta p { font-size: 11px; opacity: 0.85; margin-top: 4px; }\n\n  /* INFO GRID */\n  .info-section { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; padding: 22px 35px; background: #f8f9fa; border-bottom: 2px solid #e0e0e0; }\n  .info-box h4 { font-size: 10px; text-transform: uppercase; color: #888; letter-spacing: 1px; margin-bottom: 8px; }\n  .info-box p { font-size: 12px; line-height: 1.6; }\n  .info-box strong { color: #1a1a2e; }\n\n  /* CONTENT */\n  .content { padding: 25px 35px; }\n\n  /* DISCLAIMER */\n  .disclaimer { background: #fff8e1; border-left: 4px solid #f0a500; padding: 10px 14px; border-radius: 0 6px 6px 0; margin-bottom: 20px; font-size: 11px; color: #7a5c00; line-height: 1.5; }\n\n  /* TABLE */\n  table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }\n  thead th { background: #1a1a2e; color: #fff; padding: 10px 12px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }\n  tbody td { padding: 10px 12px; border-bottom: 1px solid #eee; vertical-align: top; font-size: 12px; line-height: 1.5; }\n  tbody tr:nth-child(even) { background: #f9f9f9; }\n  tbody tr:last-child td { border-bottom: 2px solid #1a1a2e; }\n  .note-text { font-size: 10px; color: #e67e22; }\n  .center { text-align: center; }\n  .right { text-align: right; }\n  .amount { font-weight: 700; color: #1a1a2e; }\n\n  /* TOTALS */\n  .totals-wrap { display: flex; justify-content: flex-end; margin-bottom: 25px; }\n  .totals-box { width: 320px; background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; }\n  .totals-row { display: flex; justify-content: space-between; padding: 9px 16px; border-bottom: 1px solid #e0e0e0; }\n  .totals-row:last-child { border-bottom: none; }\n  .totals-row.discount { background: #e8f5e9; color: #2e7d32; font-weight: 600; }\n  .totals-row.grand { background: #1a1a2e; color: #fff; font-size: 15px; font-weight: 700; padding: 13px 16px; }\n\n  /* FOOTER */\n  .footer { background: #1a1a2e; color: rgba(255,255,255,0.75); padding: 18px 35px; font-size: 10px; line-height: 1.7; }\n  .footer strong { color: #fff; }\n  .footer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }\n  .validity { text-align: center; padding: 12px; background: #f8f9fa; border: 1px dashed #ccc; border-radius: 6px; font-size: 11px; color: #888; margin-bottom: 20px; }\n</style>\n</head>\n<body>\n\n<!-- HEADER -->\n<div class=\"header\">\n  <div class=\"header-top\">\n    <div class=\"brand\">\n      <h1>🏠 WaltonMarket</h1>\n      <p>Smart Home Automation Solutions — Okara, Pakistan</p>\n    </div>\n    <div class=\"quote-meta\">\n      <div class=\"quote-label\">QUOTATION</div>\n      <p>Ref No: <strong style=\"color:#fff\">${quoteRef}</strong></p>\n      <p>Date: ${date}</p>\n    </div>\n  </div>\n</div>\n\n<!-- INFO GRID -->\n<div class=\"info-section\">\n  <div class=\"info-box\">\n    <h4>Customer Details</h4>\n    <p><strong>${customerName}</strong></p>\n    <p>📱 ${customerPhone}</p>\n    ${customerAddress ? `<p>📍 ${customerAddress}</p>` : ''}\n  </div>\n  <div class=\"info-box\">\n    <h4>Property</h4>\n    <p><strong>${city}</strong></p>\n    <p>${marlas > 0 ? marlas + ' Marla' : '—'} | ${stories} Stor${stories > 1 ? 'ies' : 'y'}</p>\n    ${roomSummary ? `<p style=\"font-size:11px;color:#666;margin-top:4px\">${roomSummary}</p>` : ''}\n  </div>\n  <div class=\"info-box\">\n    <h4>Scope</h4>\n    <p>${deviceSummary || '—'}</p>\n    <p style=\"font-size:11px;color:#666;margin-top:4px\">Installation included in all prices</p>\n  </div>\n</div>\n\n<!-- CONTENT -->\n<div class=\"content\">\n\n  <div class=\"disclaimer\">\n    <strong>⚠️ Important:</strong> This is a system-generated estimate. Items marked with \"Product price to be confirmed\" require finalization before order. Actual pricing may vary based on site conditions and specific product requirements. Wiring for under-construction properties is quoted separately after site survey.\n  </div>\n\n  <table>\n    <thead>\n      <tr>\n        <th style=\"width:35%\">Item / Description</th>\n        <th style=\"width:6%;text-align:center\">Qty</th>\n        <th style=\"width:14%;text-align:right\">Product Price</th>\n        <th style=\"width:12%;text-align:right\">Installation</th>\n        <th style=\"width:13%;text-align:right\">Unit Total</th>\n        <th style=\"width:20%;text-align:right\">Line Total</th>\n      </tr>\n    </thead>\n    <tbody>\n      ${itemRows}\n    </tbody>\n  </table>\n\n  <div class=\"totals-wrap\">\n    <div class=\"totals-box\">\n      <div class=\"totals-row\">\n        <span>Subtotal</span>\n        <span>${fmt(subtotal)}</span>\n      </div>\n      ${discountRate > 0 ? `\n      <div class=\"totals-row discount\">\n        <span>🎉 ${discountLabel}</span>\n        <span>-${fmt(discountAmount)}</span>\n      </div>` : ''}\n      <div class=\"totals-row grand\">\n        <span>GRAND TOTAL</span>\n        <span>${fmt(grandTotal)}</span>\n      </div>\n    </div>\n  </div>\n\n  <div class=\"validity\">\n    🗓️ This quotation is valid for <strong>30 days</strong> from the date of issue. &nbsp;|&nbsp; Prices subject to change without prior notice.\n  </div>\n\n</div>\n\n<!-- FOOTER -->\n<div class=\"footer\">\n  <div class=\"footer-grid\">\n    <div>\n      <p><strong>WaltonMarket</strong></p>\n      <p>Second Floor, Al-Husain Plaza</p>\n      <p>M.A. Jinnah Road, Okara, Punjab, Pakistan</p>\n    </div>\n    <div>\n      <p>📞 +923010756404</p>\n      <p>📧 thewaltonmarket@gmail.com</p>\n      <p>🗺️ maps.app.goo.gl/uSmAJPZrEqJbN7Yh6</p>\n    </div>\n  </div>\n</div>\n\n</body>\n</html>`;\n\nreturn [{json: {\n  html,\n  filename: `WM_Quote_${quoteRef}.pdf`,\n  sessionId,\n  customerPhone,\n  textQuote\n}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1584,
+        384
+      ],
+      "id": "d4e7f813-ab30-4058-9243-34d2b78345fe",
+      "name": "Generate PDF HTML"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.html2pdf.app/v1/generate",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "html",
+              "value": "={{ $json.html }}"
+            },
+            {
+              "name": "apiKey",
+              "value": "YOUR_HTML2PDF_API_KEY"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1792,
+        384
+      ],
+      "id": "e3a13e88-ee98-47c1-825b-5437157fca1c",
+      "name": "Convert to PDF"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO quotations (quote_ref, customer_name, customer_phone, customer_address, city, marlas, stories, subtotal, discount_amount, grand_total)\nVALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)",
+        "options": {
+          "queryReplacement": "=$1: {{ $('Calculate Quote').first().json.quoteRef }}\n$2: {{ $('Quotation Handler').first().json.quoteData.customerName }}\n$3: {{ $('Calculate Quote').first().json.customerPhone }}\n$4: {{ $('Quotation Handler').first().json.quoteData.customerAddress }}\n$5: {{ $('Calculate Quote').first().json.city || 'Not specified' }}\n$6: {{ parseInt($('Calculate Quote').first().json.marlas) || 0 }}\n$7: {{ parseInt($('Calculate Quote').first().json.stories) || 1 }}\n$8:  {{ parseFloat($('Calculate Quote').first().json.subtotal) || 0 }}\n$9:  {{ parseFloat($('Calculate Quote').first().json.discountAmount) || 0 }}\n$10: {{ parseFloat($('Calculate Quote').first().json.grandTotal) || 0 }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2176,
+        400
+      ],
+      "id": "a53af8f4-19ce-4c5f-a53b-f94428892cd1",
+      "name": "Save Quotation Record",
+      "credentials": {
+        "postgres": {
+          "id": "YOUR_POSTGRES_CREDENTIAL_ID",
+          "name": "WaltonMarket Hetzner DB"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://waha:3000/api/sendText",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Api-Key",
+              "value": "YOUR_WAHA_API_KEY"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"chatId\": \"{{ $('Calculate Quote').first().json.customerPhone.replace(/^0/, '92') }}@c.us\", \"text\": {{ JSON.stringify($('Calculate Quote').first().json.textQuote) }}, \"session\": \"default\"}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2416,
+        400
+      ],
+      "id": "40cfe3dc-daed-4677-b0cb-175d770f426b",
+      "name": "Send Text Quote"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE sessions SET quote_state = NULL, quote_data = '{}' WHERE session_id = $1",
+        "options": {
+          "queryReplacement": "=$1: {{ $('Generate PDF HTML').first().json.sessionId }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        3088,
+        464
+      ],
+      "id": "d1dc0011-11ab-441b-a5a1-bb349e75cec4",
+      "name": "Clear Quote Session",
+      "credentials": {
+        "postgres": {
+          "id": "YOUR_POSTGRES_CREDENTIAL_ID",
+          "name": "WaltonMarket Hetzner DB"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT quote_ref, city, marlas, grand_total, feedback, feedback_comment, created_at\nFROM quotations\nWHERE customer_phone = $1\n   OR customer_phone = CONCAT('0', RIGHT($1, 10))\n   OR customer_phone = CONCAT('92', RIGHT($1, 10))\nORDER BY created_at DESC",
+        "options": {
+          "queryReplacement": "=$1: {{ $('Extract Message').first().json.session_id }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -976,
+        368
+      ],
+      "id": "668b4e9a-8d0f-4ce0-8fb7-f8beac9e3c68",
+      "name": "Fetch Customer Quotes",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "YOUR_POSTGRES_CREDENTIAL_ID",
+          "name": "WaltonMarket Hetzner DB"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// QUOTE FEEDBACK HANDLER\n// Handles two states:\n// quote_feedback_pending -> waiting for yes/no\n// quote_feedback_detail  -> waiting for \"what was wrong\"\n\nconst buildData = $('Build AI Prompt').first().json;\nconst message = buildData.message.trim();\nconst sessionId = buildData.sessionId;\nconst session = buildData.session || {};\n\nconst quoteState = session.quote_state || null;\nconst quoteData = typeof session.quote_data === 'string'\n  ? JSON.parse(session.quote_data)\n  : (session.quote_data || {});\n\n// ─────────────────────────────────────────────\n// STATE: quote_feedback_pending\n// Customer just received quotation — ask if helpful\n// ─────────────────────────────────────────────\nif (quoteState === 'quote_feedback_pending') {\n\n  const isYes = /^(yes|haan|han|hnji|bilkul|helpful|good|great|theek|ok|okay|👍)/i.test(message);\n  const isNo  = /^(no|nahi|nay|nope|not|galt|wrong|incorrect|👎)/i.test(message);\n\n  if (isYes) {\n    return [{json: {\n      action: 'save_feedback',\n      feedback: 'positive',\n      feedbackComment: null,\n      quoteRef: quoteData.quoteRef,\n      customerPhone: quoteData.customerPhone,\n      reply: '✅ Shukriya! Khushi hui ke quotation helpful thi.\\n\\nKoi bhi sawaal ho to hum hamesha yahan hain. 😊\\n\\nType *menu* to return to main menu.',\n      newQuoteState: null,\n      newQuoteData: {},\n      sessionId,\n      proceedToCalculator: false\n    }}];\n  }\n\n  if (isNo) {\n    return [{json: {\n      action: 'ask_feedback_detail',\n      feedback: 'negative',\n      feedbackComment: null,\n      quoteRef: quoteData.quoteRef,\n      customerPhone: quoteData.customerPhone,\n      reply: '😔 Afsos hua. Kya masla tha? Please batayein taake hum behtar kar sakein:\\n\\n- Pricing zyada thi?\\n- Koi product missing tha?\\n- Kuch samajh nahi aaya?\\n- Kuch aur?\\n\\n_Apna jawab type karein._',\n      newQuoteState: 'quote_feedback_detail',\n      newQuoteData: quoteData,\n      sessionId,\n      proceedToCalculator: false\n    }}];\n  }\n\n  // Unrecognized response — remind\n  return [{json: {\n    action: 'remind_feedback',\n    feedback: null,\n    feedbackComment: null,\n    quoteRef: quoteData.quoteRef,\n    customerPhone: quoteData.customerPhone,\n    reply: 'Kya aapko quotation helpful lagi?\\n\\n✅ *Yes* — agar helpful thi\\n❌ *No* — agar koi masla tha\\n\\n_Type *menu* to skip._',\n    newQuoteState: 'quote_feedback_pending',\n    newQuoteData: quoteData,\n    sessionId,\n    proceedToCalculator: false\n  }}];\n}\n\n// ─────────────────────────────────────────────\n// STATE: quote_feedback_detail\n// Customer explaining what was wrong\n// ─────────────────────────────────────────────\nif (quoteState === 'quote_feedback_detail') {\n\n  const comment = message;\n\n  return [{json: {\n    action: 'save_feedback',\n    feedback: 'negative',\n    feedbackComment: comment,\n    quoteRef: quoteData.quoteRef,\n    customerPhone: quoteData.customerPhone,\n    reply: '✅ Shukriya feedback ke liye! Hum is par kaam karenge aur aapke liye behtar quotation banayenge.\\n\\nKisi bhi sawaal ke liye:\\n📞 +923010756404\\n\\nType *menu* to return to main menu.',\n    newQuoteState: null,\n    newQuoteData: {},\n    sessionId,\n    proceedToCalculator: false\n  }}];\n}\n\n// Fallback\nreturn [{json: {\n  action: 'skip',\n  feedback: null,\n  feedbackComment: null,\n  quoteRef: null,\n  customerPhone: null,\n  reply: 'Type *menu* to return to main menu.',\n  newQuoteState: null,\n  newQuoteData: {},\n  sessionId,\n  proceedToCalculator: false\n}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        816,
+        608
+      ],
+      "id": "316aa8b7-96cc-4e00-b12b-b91fe2145f8d",
+      "name": "Quote Feedback Handler"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE quotations\nSET feedback = $1, feedback_comment = $2, feedback_at = NOW()\nWHERE quote_ref = $3",
+        "options": {
+          "queryReplacement": "=$1: {{ $json.feedback }} \n$2: {{ $json.feedbackComment }} \n$3: {{ $json.quoteRef }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1280,
+        624
+      ],
+      "id": "b732e462-4828-4900-bde6-7d6b556ce65a",
+      "name": "Save Feedback to DB",
+      "credentials": {
+        "postgres": {
+          "id": "YOUR_POSTGRES_CREDENTIAL_ID",
+          "name": "WaltonMarket Hetzner DB"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://waha:3000/api/sendText",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Api-Key",
+              "value": "YOUR_WAHA_API_KEY"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"chatId\": \"{{ $('Extract Message').first().json.chat_id }}\", \"text\": {{ JSON.stringify($('Quote Feedback Handler').first().json.reply) }}, \"session\": \"default\"}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1472,
+        624
+      ],
+      "id": "43ec37e4-e6e0-4b8c-8f44-05f266306030",
+      "name": "Send Feedback Reply"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO sessions (session_id, quote_state, quote_data)\nVALUES ($1, $2, $3::jsonb)\nON CONFLICT (session_id) DO UPDATE SET\n  quote_state = EXCLUDED.quote_state,\n  quote_data = EXCLUDED.quote_data",
+        "options": {
+          "queryReplacement": "=$1: {{ $('Quote Feedback Handler').first().json.sessionId }}\n$2: {{ $('Quote Feedback Handler').first().json.newQuoteState }}\n$3: {{ JSON.stringify(\n$('Quote Feedback Handler').first().json.newQuoteData) }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1936,
+        688
+      ],
+      "id": "3d48124f-d71b-43a2-ab89-faeefc4148f7",
+      "name": "Save Feedback Session",
+      "credentials": {
+        "postgres": {
+          "id": "YOUR_POSTGRES_CREDENTIAL_ID",
+          "name": "WaltonMarket Hetzner DB"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO sessions (session_id, quote_state, quote_data)\nVALUES ($1, 'quote_feedback_pending', $2::jsonb)\nON CONFLICT (session_id) DO UPDATE SET\n  quote_state = 'quote_feedback_pending',\n  quote_data = EXCLUDED.quote_data",
+        "options": {
+          "queryReplacement": "=$1: {{ $('Extract Message').first().json.session_id }}\n$2: {{ JSON.stringify({quoteRef: $('Calculate Quote').first().json.quoteRef, customerPhone: $('Calculate Quote').first().json.customerPhone}) }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2624,
+        400
+      ],
+      "id": "80be49be-6bb6-4178-87af-73f7a8da5255",
+      "name": "Save Quote Feedback State",
+      "credentials": {
+        "postgres": {
+          "id": "YOUR_POSTGRES_CREDENTIAL_ID",
+          "name": "WaltonMarket Hetzner DB"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://waha:3000/api/sendText",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Api-Key",
+              "value": "YOUR_WAHA_API_KEY"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"chatId\": \"{{ $('Calculate Quote').first().json.customerPhone.replace(/^0/, '92') }}@c.us\", \"text\": \"🌟 *Kya yeh quotation helpful thi?*\\n\\n✅ *Yes* — agar pricing aur details theek lagein\\n❌ *No* — agar koi masla ho\\n\\nAapka feedback hamein behtar banata hai!\", \"session\": \"default\"}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2832,
+        400
+      ],
+      "id": "e6ad4c8c-a4b8-43ed-9947-d112b36bb230",
+      "name": "Send Feedback Request"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE sessions SET escalated_at = NOW() WHERE session_id = $1",
+        "options": {
+          "queryReplacement": "=$1: {{ $('Extract Message').first().json.session_id }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1824,
+        864
+      ],
+      "id": "7d15d736-3e36-46a5-bc9c-8a0a7418656f",
+      "name": "Set Escalated",
+      "credentials": {
+        "postgres": {
+          "id": "YOUR_POSTGRES_CREDENTIAL_ID",
+          "name": "WaltonMarket Hetzner DB"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://waha:3000/api/sendText",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Api-Key",
+              "value": "YOUR_WAHA_API_KEY"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"chatId\": \"{{ $('Extract Message').first().json.chat_id }}\", \"text\": \"🧑‍💼 Aapka request humari team tak pahuncha diya gaya hai. Jald hi koi agent aapse contact karega.\\n\\nWhatsApp: +923010756404\\nEmail: thewaltonmarket@gmail.com\\nWorking hours: Mon-Sat, 9am-6pm PKT\\n\\nPlease wait for a response. 🙏\\n\\nType *menu* agar aap Arik se baat karna chahein.\", \"session\": \"default\"}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2368,
+        800
+      ],
+      "id": "a50658c8-ffbf-4055-b548-0884945ac1a5",
+      "name": "Send Escalated Reply"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://waha:3000/api/sendText",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Api-Key",
+              "value": "YOUR_WAHA_API_KEY"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"chatId\": \"{{ $('Extract Message').first().json.chat_id }}\", \"text\": {{ JSON.stringify($json.reply) }}, \"session\": \"default\"}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        3360,
+        1264
+      ],
+      "id": "8faf46f6-6a19-4587-9c8a-4185287223b4",
+      "name": "Send via Waha"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://waha:3000/api/sendText",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Api-Key",
+              "value": "YOUR_WAHA_API_KEY"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"chatId\": \"{{ $('Extract Message').first().json.chat_id }}\", \"text\": {{ JSON.stringify($('Build AI Prompt').first().json.reply) }}, \"session\": \"default\"}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        976,
+        928
+      ],
+      "id": "d906d595-c877-47e2-94d9-37de0e29b654",
+      "name": "Send Menu After Clear"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE sessions SET escalated_at = NULL, quote_state = NULL, quote_data = '{}' WHERE session_id = $1",
+        "options": {
+          "queryReplacement": "=$1: {{ $('Extract Message').first().json.session_id }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        768,
+        928
+      ],
+      "id": "aa3c5684-fab8-4a69-a128-3f0fecf9a585",
+      "name": "Clear Escalation",
+      "credentials": {
+        "postgres": {
+          "id": "YOUR_POSTGRES_CREDENTIAL_ID",
+          "name": "WaltonMarket Hetzner DB"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extract Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Message": {
+      "main": [
+        [
+          {
+            "node": "Fetch Session",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Intent Router": {
+      "main": [
+        [
+          {
+            "node": "Handle Order Flow",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Handle Order Confirm",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Handle Cart View",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Handle Cart Clear",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Handle Cart Remove",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Handle Checkout",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Handle Buy",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Quotation Handler",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Quotation Handler",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Quote Feedback Handler",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Escalated Reply",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set Escalated",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [],
+        [
+          {
+            "node": "Send via Waha",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Clear Escalation",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set Escalated",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare AI Save",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Handle Cart View": {
+      "main": [
+        [
+          {
+            "node": "Save Session",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Handle Cart Remove": {
+      "main": [
+        [
+          {
+            "node": "Save Session",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Handle Checkout": {
+      "main": [
+        [
+          {
+            "node": "Save Session",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Handle Buy": {
+      "main": [
+        [
+          {
+            "node": "Save Session",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Handle Order Flow": {
+      "main": [
+        [
+          {
+            "node": "Save Session",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Handle Order Confirm": {
+      "main": [
+        [
+          {
+            "node": "Save Session",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Session": {
+      "main": [
+        [
+          {
+            "node": "Save Handler Session",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build AI Prompt": {
+      "main": [
+        [
+          {
+            "node": "Skip AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Skip AI": {
+      "main": [
+        [
+          {
+            "node": "Intent Router",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Call Gemini + Process",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Gemini + Process": {
+      "main": [
+        [
+          {
+            "node": "Intent Router",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Session": {
+      "main": [
+        [
+          {
+            "node": "Fetch Customer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Products": {
+      "main": [
+        [
+          {
+            "node": "Fetch Company Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Company Info": {
+      "main": [
+        [
+          {
+            "node": "Fetch Customer Quotes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare AI Save": {
+      "main": [
+        [
+          {
+            "node": "Save Session DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Return AI Reply": {
+      "main": [
+        [
+          {
+            "node": "Send via Waha",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Order + Reply": {
+      "main": [
+        [
+          {
+            "node": "Send via Waha",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Customer": {
+      "main": [
+        [
+          {
+            "node": "Save Order + Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Order Placed?": {
+      "main": [
+        [
+          {
+            "node": "Save Customer",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Save Order + Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Handler Session": {
+      "main": [
+        [
+          {
+            "node": "Order Placed?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Session DB": {
+      "main": [
+        [
+          {
+            "node": "Return AI Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Customer": {
+      "main": [
+        [
+          {
+            "node": "Fetch Products",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Handle Cart Clear": {
+      "main": [
+        [
+          {
+            "node": "Save Session",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Quotation Handler": {
+      "main": [
+        [
+          {
+            "node": "Proceed to Calculator?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Proceed to Calculator?": {
+      "main": [
+        [
+          {
+            "node": "Calculate Quote",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Save Quote Session",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Quote Session": {
+      "main": [
+        [
+          {
+            "node": "Send Quote Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Quote": {
+      "main": [
+        [
+          {
+            "node": "Generate PDF HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate PDF HTML": {
+      "main": [
+        [
+          {
+            "node": "Convert to PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to PDF": {
+      "main": [
+        [
+          {
+            "node": "Save Quotation Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Quotation Record": {
+      "main": [
+        [
+          {
+            "node": "Send Text Quote",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Text Quote": {
+      "main": [
+        [
+          {
+            "node": "Save Quote Feedback State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Customer Quotes": {
+      "main": [
+        [
+          {
+            "node": "Build AI Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Quote Feedback Handler": {
+      "main": [
+        [
+          {
+            "node": "Save Feedback to DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Feedback to DB": {
+      "main": [
+        [
+          {
+            "node": "Send Feedback Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Feedback Reply": {
+      "main": [
+        [
+          {
+            "node": "Save Feedback Session",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Quote Feedback State": {
+      "main": [
+        [
+          {
+            "node": "Send Feedback Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Feedback Request": {
+      "main": [
+        []
+      ]
+    },
+    "Set Escalated": {
+      "main": [
+        [
+          {
+            "node": "Send Escalated Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clear Escalation": {
+      "main": [
+        [
+          {
+            "node": "Send Menu After Clear",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "YOUR_VERSION_ID",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "YOUR_N8N_INSTANCE_ID"
+  },
+  "id": "25xrGALJPr79bTVh",
+  "tags": []
+}
