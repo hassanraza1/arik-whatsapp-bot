@@ -11,8 +11,21 @@
 
 ---
 ## 📱 Live Demo
-![Arik Demo](Arik_Gif.gif)
+![Arik live demo](docs/media/arik-demo.gif)
 
+## Workflows
+
+**Walton Commerce Engine** — main WhatsApp workflow (catalogue cards, cart, quotes).
+
+![Walton Commerce Engine](docs/media/workflow-commerce-engine.png)
+
+**Shopify - Order Created**
+
+![Shopify - Order Created](docs/media/workflow-shopify-order-created.png)
+
+**Shopify - Order Fulfilled**
+
+![Shopify - Order Fulfilled](docs/media/workflow-shopify-order-fulfilled.png)
 
 ## Repository layout (2026-10-28)
 
@@ -25,6 +38,7 @@
 | `workflows/` | Active n8n workflow exports, credentials removed |
 | `arik-main.json` | Historical April 2026 workflow export |
 | `admin/public/` | Empty stub matching the server directory |
+| `docs/media/` | Live demo GIF and workflow screenshots |
 
 Release `v1.0.0-2026.10.28`. See `CHANGELOG.md`.
 
@@ -64,7 +78,7 @@ Customer WhatsApp
 ```
 
 Catalogue replies use bracket cards. `next` / `aage` / `more` turns a stored page. The published workflow export is `workflows/walton-commerce-engine.json`. The older export remains at `arik-main.json`.
-![Arik Workflow](architecture.png)
+
 ---
 
 ## Key Features
