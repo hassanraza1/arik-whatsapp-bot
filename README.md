@@ -137,7 +137,7 @@ This is **Phase 1 of 10** — currently live in production.
 | Phase | Focus | Status |
 |---|---|---|
 | **Phase 1** | WhatsApp AI bot — live on real WhatsApp with full sales & quotation flow | ✅ Live |
-| **Phase 2** | Modular workflow architecture — sub-workflows, clean separation of concerns | 🔄 In Progress |
+| **Phase 2** | Modular workflow architecture — sub-workflows, clean separation of concerns | ✅ Live |
 | **Phase 3** | Knowledge base + RAG — PDF/document ingestion, vector search for smarter answers | 📅 Planned |
 | **Phase 4** | Vision + Voice AI — image recognition for products, voice message support | 📅 Planned |
 | **Phase 5** | Shopify integration — live inventory sync, order management via WhatsApp | 📅 Planned |
