@@ -1,0 +1,86 @@
+# Secrets are not stored in this file.
+# Export POSTGRES_PASSWORD, DB_POSTGRESDB_PASSWORD, WAHA_API_KEY,
+# and WAHA_DASHBOARD_PASSWORD before starting the stack.
+# n8n image is built from ./n8n-custom:
+#   docker build -t waltonmarket-n8n-custom ./n8n-custom
+# Quotation uploads stay in ./quotations and are not committed.
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    restart: always
+    environment:
+      POSTGRES_USER: walton
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: waltonmarket
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - walton
+
+  n8n:
+    image: waltonmarket-n8n-custom
+    restart: always
+    ports:
+      - "5678:5678"
+    environment:
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: postgres
+      DB_POSTGRESDB_PORT: "5432"
+      DB_POSTGRESDB_DATABASE: waltonmarket
+      DB_POSTGRESDB_USER: walton
+      DB_POSTGRESDB_PASSWORD: ${DB_POSTGRESDB_PASSWORD}
+      N8N_HOST: 204.168.182.88
+      N8N_PORT: "5678"
+      N8N_PROTOCOL: http
+      WEBHOOK_URL: https://n8n.waltonmarket.xyz/
+      GENERIC_TIMEZONE: Asia/Karachi
+      N8N_SECURE_COOKIE: "false"
+      N8N_EDITOR_BASE_URL: https://n8n.waltonmarket.xyz/
+    volumes:
+      - n8ndata:/home/node/.n8n
+      - ./quotations:/opt/waltonmarket/quotations
+    networks:
+      - walton
+    depends_on:
+      - postgres
+
+  waha:
+    image: devlikeapro/waha:latest-2026.7.1
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      WAHA_DEFAULT_ENGINE: WEBJS
+      WHATSAPP_RESTART_ALL_SESSIONS: "True"
+      WAHA_API_KEY: ${WAHA_API_KEY}
+      WAHA_DASHBOARD_USERNAME: walton
+      WAHA_DASHBOARD_PASSWORD: ${WAHA_DASHBOARD_PASSWORD}
+      WHATSAPP_DOWNLOAD_MEDIA: "false"
+      WAHA_PRINT_QR: "false"
+    volumes:
+      - waha_sessions:/app/.sessions
+    networks:
+      - walton
+
+  buffer:
+    build: ./buffer
+    restart: always
+    environment:
+      PORT: "3002"
+      N8N_WEBHOOK_URL: http://n8n:5678/webhook/ai-chat
+      WAHA_URL: http://waha:3000
+      WAHA_API_KEY: ${WAHA_API_KEY}
+      DEBOUNCE_MS: "8000"
+      MAX_WAIT_MS: "15000"
+    networks:
+      - walton
+
+volumes:
+  pgdata:
+  n8ndata:
+  waha_sessions:
+
+networks:
+  walton:

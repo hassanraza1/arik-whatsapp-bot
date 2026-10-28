@@ -13,6 +13,21 @@
 ## 📱 Live Demo
 ![Arik Demo](Arik_Gif.gif)
 
+
+## Repository layout (2026-10-28)
+
+| Path | What it is |
+|---|---|
+| `docker-compose.yml` | Live service definitions with secret values replaced by environment references |
+| `buffer/` | Debounce gateway image |
+| `n8n-custom/` | Dockerfile for the `waltonmarket-n8n-custom` image |
+| `sql/` | Schema and non-customer seeds |
+| `workflows/` | Active n8n workflow exports, credentials removed |
+| `arik-main.json` | Historical April 2026 workflow export |
+| `admin/public/` | Empty stub matching the server directory |
+
+Release `v1.0.0-2026.10.28`. See `CHANGELOG.md`.
+
 ## The Problem
 
 WaltonMarket receives dozens of WhatsApp inquiries daily for smart home
@@ -35,9 +50,11 @@ PostgreSQL, and self-hosted WAHA infrastructure — deployed on Hetzner.
 ```
 Customer WhatsApp
        ↓
-   WAHA (Self-hosted WhatsApp API — NOWEB engine)
+   WAHA (self-hosted, WEBJS engine)
        ↓
-   n8n Workflow Engine (Docker)
+   Buffer gateway (debounce, then POST /webhook/ai-chat)
+       ↓
+   n8n — Walton Commerce Engine
        ↓
    Gemini 2.5 Flash (Intent Classification + Response Generation)
        ↓
@@ -45,6 +62,8 @@ Customer WhatsApp
        ↓
    Reply via WAHA → Customer WhatsApp
 ```
+
+Catalogue replies use bracket cards. `next` / `aage` / `more` turns a stored page. The published workflow export is `workflows/walton-commerce-engine.json`. The older export remains at `arik-main.json`.
 ![Arik Workflow](architecture.png)
 ---
 
@@ -70,10 +89,11 @@ Customer WhatsApp
 |---|---|
 | Workflow Engine | n8n v2.12.3 (self-hosted, Docker) |
 | AI Model | Google Gemini 2.5 Flash (thinkingBudget: 0) |
-| WhatsApp API | WAHA (NOWEB engine, self-hosted Docker) |
-| Database | PostgreSQL 16 |
+| WhatsApp API | WAHA WEBJS (`devlikeapro/waha:latest-2026.7.1`) |
+| Database | PostgreSQL 16 (`pgvector/pgvector:pg16`) |
 | Server | Hetzner VPS — Ubuntu 24.04 |
-| Infrastructure | Docker + Docker Compose |
+| Gateway | Node 20 buffer (`buffer/`, no package.json) |
+| Infrastructure | Docker Compose project `waltonmarket` |
 
 ---
 

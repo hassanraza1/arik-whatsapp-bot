@@ -1,0 +1,96 @@
+{
+  "name": "Shopify - Order Fulfilled",
+  "id": "RToq34TfQxXYr22u",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "shopify-order-fulfilled",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -400,
+        -64
+      ],
+      "id": "4e2b6285-a0f1-4d3a-9851-25f5df2383ab",
+      "name": "Webhook",
+      "webhookId": "b1153e9a-e510-4988-ab66-a7dc2716c4d8"
+    },
+    {
+      "parameters": {
+        "jsCode": "const order = $input.first().json.body || $input.first().json;\n\nlet phone = order.phone \n  || order.shipping_address?.phone \n  || order.customer?.phone \n  || '';\n\nphone = phone.replace(/[\\s\\-\\+\\(\\)]/g, '');\nif (phone.startsWith('0')) phone = '92' + phone.slice(1);\nif (!phone.startsWith('92')) phone = '92' + phone;\n\nconst fulfillment = (order.fulfillments || [])[0] || {};\nconst tracking_number = fulfillment.tracking_number || 'N/A';\nconst tracking_url = fulfillment.tracking_url || '';\nconst tracking_company = fulfillment.tracking_company || 'DigiDokaan';\n\nconst customerName = `${order.shipping_address?.first_name || order.customer?.first_name || ''} ${order.shipping_address?.last_name || order.customer?.last_name || ''}`.trim();\n\nreturn [{\n  json: {\n    order_number: order.order_number?.toString() || order.name || '',\n    customer_name: customerName,\n    chat_id: phone + '@c.us',\n    tracking_number,\n    tracking_url,\n    tracking_company\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -192,
+        -64
+      ],
+      "id": "b85ce620-bdee-44ec-bd2d-629250322049",
+      "name": "Extract Tracking"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://waha:3000/api/sendText",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Api-Key",
+              "value": "REDACTED"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"session\": \"default\",\n  \"chatId\": \"{{ $json.chat_id }}\",\n  \"text\": \"📦 *Order #{{ $json.order_number }} Shipped!*\\n\\nHi {{ $json.customer_name }}, your order has been dispatched!\\n\\n🚚 Courier: {{ $json.tracking_company }}\\n📋 Tracking ID: {{ $json.tracking_number }}\\n🔗 Track here: {{ $json.tracking_url }}\\n\\nDelivery expected within 2-4 working days.\\n\\nThank you for choosing Walton Market! 🏠\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        16,
+        -64
+      ],
+      "id": "95ea9c71-1c2b-46e3-8a31-c6a2161c768a",
+      "name": "Send Tracking WhatsApp"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extract Tracking",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Tracking": {
+      "main": [
+        [
+          {
+            "node": "Send Tracking WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "meta": {}
+}

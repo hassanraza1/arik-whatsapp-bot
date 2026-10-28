@@ -1,0 +1,200 @@
+{
+  "name": "Shopify - Order Created",
+  "id": "nnUc1OizRsVWxeuA",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "shopify-order-created",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -544,
+        -112
+      ],
+      "id": "0f1e1d46-75a4-4cc8-84e3-636bd8381634",
+      "name": "Webhook",
+      "webhookId": "ddd003b3-1dac-4dc1-b6ac-fe78962e6263"
+    },
+    {
+      "parameters": {
+        "jsCode": "const order = $input.first().json.body || $input.first().json;\n\nlet phone = order.phone \n  || order.shipping_address?.phone \n  || order.billing_address?.phone \n  || order.customer?.phone \n  || '';\n\nphone = phone.replace(/[\\s\\-\\+\\(\\)]/g, '');\nif (phone.startsWith('0')) phone = '92' + phone.slice(1);\nif (!phone.startsWith('92')) phone = '92' + phone;\n\nconst items = (order.line_items || [])\n  .map(i => `• ${i.title} x${i.quantity} — PKR ${i.price}`)\n  .join('\\n');\n\nconst address = order.shipping_address \n  ? `${order.shipping_address.address1 || ''}, ${order.shipping_address.city || ''}, ${order.shipping_address.province || ''} ${order.shipping_address.zip || ''}`.trim()\n  : 'Not provided';\n\nconst customerName = `${order.shipping_address?.first_name || order.customer?.first_name || ''} ${order.shipping_address?.last_name || order.customer?.last_name || ''}`.trim();\n\nconst paymentMethod = order.payment_gateway_names?.[0] || order.gateway || 'COD';\nconst isBankTransfer = paymentMethod.toLowerCase().includes('bank') || paymentMethod.toLowerCase().includes('transfer');\n\nlet messageText = `Assalam o Alaikum ${customerName}! 🛒\\n\\n📦 *Order #${order.order_number || order.name || ''}*\\n\\n${items}\\n\\n💰 Subtotal: PKR ${order.subtotal_price || '0'}\\n🚚 Shipping: PKR ${order.total_shipping_price_set?.shop_money?.amount || '0'}\\n*Total: PKR ${order.total_price || '0'}*\\n\\n📍 Address: ${address}\\n💳 Payment: ${isBankTransfer ? 'Bank Transfer' : 'Cash on Delivery (COD)'}`;\n\nif (isBankTransfer) {\n  messageText += `\\n\\n🏦 Please transfer to:\\nBank: MCB Limited\\nAccount: REDACTED\\nIBAN: REDACTED\\nTitle: REDACTED\\n\\n📸 After transfer, please share the receipt screenshot here.`;\n}\n\nmessageText += `\\n\\nReply *YES* to confirm or *NO* to cancel.\\n\\n— Walton Market`;\n\nreturn [{\n  json: {\n    shopify_order_id: order.id?.toString() || '',\n    order_number: order.order_number?.toString() || order.name || '',\n    customer_name: customerName,\n    customer_phone: phone,\n    customer_email: order.customer?.email || order.email || '',\n    chat_id: phone + '@c.us',\n    items: items,\n    total_price: order.total_price || '0',\n    subtotal: order.subtotal_price || '0',\n    shipping_cost: order.total_shipping_price_set?.shop_money?.amount || '0',\n    currency: order.currency || 'PKR',\n    address: address,\n    payment_method: paymentMethod,\n    is_bank_transfer: isBankTransfer,\n    financial_status: order.financial_status || 'pending',\n    created_at: order.created_at || new Date().toISOString(),\n    message_text: messageText\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -336,
+        -112
+      ],
+      "id": "fab28e0a-bb4f-47ed-b292-db5f5deaeff1",
+      "name": "Extract Order Data"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO orders (shopify_order_id, order_number, customer_name, customer_phone, customer_email, items, total_price, status, created_at)\nVALUES (\n  '{{ $json.shopify_order_id }}',\n  '{{ $json.order_number }}',\n  '{{ $json.customer_name.replace(/'/g, \"''\") }}',\n  '{{ $json.customer_phone }}',\n  '{{ $json.customer_email }}',\n  '{{ $json.items.replace(/'/g, \"''\") }}',\n  '{{ $json.total_price }}',\n  'pending_confirmation',\n  NOW()\n)\nON CONFLICT (shopify_order_id) DO NOTHING;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -128,
+        -112
+      ],
+      "id": "e73e6177-52c1-492f-8878-a810b9bc7479",
+      "name": "Save Order",
+      "credentials": {
+        "postgres": {
+          "id": "REDACTED_CREDENTIAL_ID",
+          "name": "REDACTED_CREDENTIAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://waha:3000/api/sendText",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Api-Key",
+              "value": "REDACTED"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "session",
+              "value": "default"
+            },
+            {
+              "name": "chatId",
+              "value": "={{ $('Extract Order Data').first().json.chat_id }}"
+            },
+            {
+              "name": "text",
+              "value": "={{ $('Extract Order Data').first().json.message_text }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        96,
+        -112
+      ],
+      "id": "c44dcb6a-144e-4dae-8537-f86df6c64f03",
+      "name": "Send WhatsApp via WAHA"
+    },
+    {
+      "parameters": {
+        "jsCode": "const wahaResponse = $('Send WhatsApp via WAHA').first().json;\nconst orderData = $('Extract Order Data').first().json;\n\n// Get the actual chat_id WAHA delivered to\nconst actualChatId = wahaResponse._data?.remote \n  || wahaResponse.to?._serialized \n  || wahaResponse.to \n  || orderData.chat_id;\n\nreturn [{\n  json: {\n    shopify_order_id: orderData.shopify_order_id,\n    actual_chat_id: actualChatId\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        304,
+        -112
+      ],
+      "id": "9017c203-4e9f-452f-af7e-373b90ac4f94",
+      "name": "Save Chat ID"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE orders \nSET whatsapp_chat_id = '{{ $json.actual_chat_id }}'\nWHERE shopify_order_id = '{{ $json.shopify_order_id }}';",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        512,
+        -112
+      ],
+      "id": "46cd975a-42b1-4051-a787-6cc172901ff3",
+      "name": "Update Chat ID",
+      "credentials": {
+        "postgres": {
+          "id": "REDACTED_CREDENTIAL_ID",
+          "name": "REDACTED_CREDENTIAL"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extract Order Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Order Data": {
+      "main": [
+        [
+          {
+            "node": "Save Order",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Order": {
+      "main": [
+        [
+          {
+            "node": "Send WhatsApp via WAHA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send WhatsApp via WAHA": {
+      "main": [
+        [
+          {
+            "node": "Save Chat ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Chat ID": {
+      "main": [
+        [
+          {
+            "node": "Update Chat ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}

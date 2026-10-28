@@ -1,0 +1,255 @@
+{
+  "name": "Walton AI — Agent",
+  "id": "OW40uA61udXXMZq3",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ai-chat-v3",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -960,
+        -576
+      ],
+      "id": "4761cdfb-acb3-410f-a23a-3792b5c8789b",
+      "name": "Webhook",
+      "webhookId": "cf5f95e3-e8a8-426e-9337-8934a1b998a2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\n\n// Detect source: tester UI vs WAHA\nlet source, chatId, messageBody, isFromMe, messageType;\n\n// Check if it's the tester format (in body)\nif (input.body?.message !== undefined && input.body?.session_id !== undefined) {\n  // Tester UI format: { body: { message, session_id } }\n  source = 'tester';\n  chatId = input.body.session_id;\n  messageBody = input.body.message;\n  isFromMe = false;\n  messageType = 'chat';\n} \n// Check if it's WAHA format\nelse if (input.payload) {\n  // WAHA format: { event, session, payload: { from, body, ... } }\n  source = 'waha';\n  chatId = input.payload.from;\n  messageBody = input.payload.body || '';\n  isFromMe = input.payload.fromMe || false;\n  messageType = input.payload.type || 'chat';\n} \n// Unknown shape\nelse {\n  return [{ json: { skip: true, reason: 'Unknown payload format', rawInput: input } }];\n}\n\n// Basic guardrails (equivalent to v2's Filter Real Messages)\nif (messageType !== 'chat' || !messageBody || !messageBody.trim()) {\n  return [{ json: { skip: true, reason: 'not a chat message or empty body' } }];\n}\n\nreturn [{\n  json: { source, chatId, messageBody, isFromMe, messageType }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -736,
+        -576
+      ],
+      "id": "04306a52-c61b-4012-a906-8d92a466126c",
+      "name": "Normalize Payload"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT role, content \nFROM v3_conversation_history \nWHERE chat_id = '{{ $json.chatId }}'\nORDER BY created_at DESC \nLIMIT 10",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -544,
+        -576
+      ],
+      "id": "ca2c4e61-d217-4e23-be52-aed2c35db0ed",
+      "name": "Fetch History",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "REDACTED_CREDENTIAL_ID",
+          "name": "REDACTED_CREDENTIAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// ═══ ENTRY POINT DETECTION ═══\nconst input = $input.first().json;\nconst isLoopBack = input.contents !== undefined;\n\nlet workflowState;\n\nif (isLoopBack) {\n  workflowState = {\n    chatId: input.chatId,\n    userMessage: input.userMessage,\n    source: input.source,\n    contents: input.contents,\n    iteration: input.iteration || 1\n  };\n} else {\n  const prev = $('Normalize Payload').first().json;\n  const historyRows = $('Fetch History').all().map(i => i.json);\n  \n  const contents = [];\n  const recentHistory = [...historyRows].reverse().slice(0, 6);\n  for (const turn of recentHistory) {\n    if (turn.role && turn.content) {\n      contents.push({ role: turn.role, parts: [{ text: turn.content }] });\n    }\n  }\n  contents.push({ role: \"user\", parts: [{ text: prev.messageBody }] });\n  \n  workflowState = {\n    chatId: prev.chatId,\n    userMessage: prev.messageBody,\n    source: prev.source,\n    contents: contents,\n    iteration: 0\n  };\n}\n\nconst GEMINI_API_KEY = 'YOUR_GEMINI_API_KEY';\nconst MAX_ITERATIONS = 5;\n\n// Safety checks\nif (workflowState.iteration >= MAX_ITERATIONS) {\n  return [{\n    json: {\n      mode: 'FINAL_REPLY',\n      ...workflowState,\n      reply: \"I'm having trouble. Please type *menu* to start over.\"\n    }\n  }];\n}\n\nif (!workflowState.contents || workflowState.contents.length === 0) {\n  return [{\n    json: {\n      mode: 'FINAL_REPLY',\n      reply: \"Something went wrong. Please type *hi* to begin.\"\n    }\n  }];\n}\n\n// ═══ DATABASE CONNECTION ═══\nconst { Pool } = require('pg');\nconst pool = new Pool({\n  host: 'postgres',\n  port: 5432,\n  database: 'waltonmarket',\n  user: 'walton',\n  password: 'REDACTED'\n});\n\n// ═══ TOOL DEFINITIONS ═══\nconst tools = [{\n  functionDeclarations: [\n    {\n      name: \"send_main_menu\",\n      description: \"Show main menu. Use when customer greets (hi/hello/assalam) or types 'menu'.\",\n      parameters: { type: \"object\", properties: {} }\n    },\n    {\n      name: \"search_products\",\n      description: \"Search products by name or category. Use when customer asks about specific products.\",\n      parameters: {\n        type: \"object\",\n        properties: {\n          query: { type: \"string\", description: \"Search query (empty for featured products)\" }\n        }\n      }\n    },\n    {\n      name: \"get_product_details\",\n      description: \"Get product details by ID.\",\n      parameters: {\n        type: \"object\",\n        properties: {\n          product_id: { type: \"integer\" }\n        },\n        required: [\"product_id\"]\n      }\n    },\n    {\n      name: \"view_cart\",\n      description: \"Show cart contents.\",\n      parameters: { type: \"object\", properties: {} }\n    },\n    {\n      name: \"add_to_cart\",\n      description: \"Add product to cart.\",\n      parameters: {\n        type: \"object\",\n        properties: {\n          product_id: { type: \"integer\" },\n          quantity: { type: \"integer\" }\n        },\n        required: [\"product_id\"]\n      }\n    },\n    {\n      name: \"remove_from_cart\",\n      description: \"Remove product from cart.\",\n      parameters: {\n        type: \"object\",\n        properties: {\n          product_id: { type: \"integer\" }\n        },\n        required: [\"product_id\"]\n      }\n    },\n    {\n      name: \"clear_cart\",\n      description: \"Empty cart completely.\",\n      parameters: { type: \"object\", properties: {} }\n    },\n    {\n      name: \"checkout\",\n      description: \"Complete order with customer details.\",\n      parameters: {\n        type: \"object\",\n        properties: {\n          customer_name: { type: \"string\" },\n          phone: { type: \"string\" },\n          address: { type: \"string\" },\n          city: { type: \"string\" }\n        },\n        required: [\"customer_name\", \"phone\", \"address\", \"city\"]\n      }\n    },\n    {\n      name: \"get_order_status\",\n      description: \"Check order status.\",\n      parameters: {\n        type: \"object\",\n        properties: {\n          phone: { type: \"string\" }\n        }\n      }\n    },\n    {\n      name: \"start_quotation\",\n      description: \"Start installation quote process.\",\n      parameters: { type: \"object\", properties: {} }\n    },\n    {\n      name: \"get_company_info\",\n      description: \"Get company information (location, payment, delivery).\",\n      parameters: {\n        type: \"object\",\n        properties: {\n          info_type: { type: \"string\", enum: [\"location\", \"contact\", \"payment\", \"delivery\", \"all\"] }\n        },\n        required: [\"info_type\"]\n      }\n    },\n    {\n      name: \"escalate_to_human\",\n      description: \"Transfer to human support.\",\n      parameters: { type: \"object\", properties: {} }\n    }\n  ]\n}];\n\n// ═══ SYSTEM INSTRUCTION ═══\nconst systemInstruction = `You are Arik, WaltonMarket's WhatsApp assistant for smart home products in Pakistan.\n\nRULES:\n1. ALWAYS call tools - never generate responses without tools\n2. Match customer's language: English→English, Roman Urdu→Roman Urdu\n3. After tool returns data, wrap it naturally in customer's language\n4. Keep responses under 500 chars unless showing product lists\n5. Use *bold* for products, Rs. for prices\n\nLANGUAGE EXAMPLES:\n- Customer says \"Hi\" → respond in English: \"Welcome to WaltonMarket!\"\n- Customer says \"assalam\" → respond in Roman Urdu: \"Walaikum Assalam!\"\n- Customer says \"show switches\" → English: \"Here are our switches:\"\n- Customer says \"switch dikhao\" → Roman Urdu: \"Yeh rahe switches:\"\n\nCONTEXT:\n- If you showed products #1-5 and customer says \"first one\" or \"pehla wala\" or \"1\", they want product #1 from the list → call get_product_details or add_to_cart with that product_id\n- If customer says \"add to cart\" after seeing a product, add that product\n- Guide next steps naturally`;\n\n// ═══ TOOL EXECUTOR ═══\nasync function executeTool(toolName, toolArgs, chatId) {\n  try {\n    switch (toolName) {\n      case \"send_main_menu\":\n        return `📋 *WaltonMarket Main Menu*\n\n1️⃣ View Catalogue\n2️⃣ Order Status\n3️⃣ Installation Quote\n4️⃣ Talk to Human\n\nSelect a number or tell me what you need.`;\n\n      case \"search_products\": {\n        const query = (toolArgs.query || '').trim();\n        if (!query) {\n          const { rows } = await pool.query('SELECT id, product_name, price FROM products LIMIT 5');\n          let result = \"Featured products:\\n\\n\";\n          rows.forEach((p, i) => result += `${i+1}. *${p.product_name}* — Rs. ${p.price}\\n`);\n          return result + \"\\nLooking for something specific?\";\n        }\n        \n        const embResp = await this.helpers.httpRequest({\n          method: 'POST',\n          url: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-2:embedContent',\n          headers: { 'Content-Type': 'application/json' },\n          qs: { key: GEMINI_API_KEY },\n          body: { model: \"models/gemini-embedding-2\", content: { parts: [{ text: query }] } },\n          timeout: 10000\n        });\n        \n        const embedding = embResp.embedding.values;\n        const embStr = `[${embedding.join(',')}]`;\n        \n        const { rows } = await pool.query(\n          `SELECT id, product_name, price FROM products \n           WHERE embedding IS NOT NULL \n           ORDER BY embedding <-> $1::vector LIMIT 5`,\n          [embStr]\n        );\n        \n        if (rows.length === 0) return `No products found for \"${query}\". Try a different search?`;\n        \n        let result = `Found ${rows.length} products:\\n\\n`;\n        rows.forEach((p, i) => result += `${i+1}. *${p.product_name}* — Rs. ${p.price}\\n`);\n        return result + \"\\nNeed details or want to add to cart?\";\n      }\n\n      case \"get_product_details\": {\n        const { rows } = await pool.query(\n          `SELECT product_name, price, description, category, compatibility, stock FROM products WHERE id = $1`,\n          [toolArgs.product_id]\n        );\n        if (rows.length === 0) return \"Product not found.\";\n        \n        const p = rows[0];\n        let result = `*${p.product_name}*\\n\\n💰 Price: Rs. ${p.price}\\n`;\n        if (p.category) result += `📦 Category: ${p.category}\\n`;\n        if (p.compatibility) result += `🔌 Compatible: ${p.compatibility}\\n`;\n        if (p.stock) result += `📊 Stock: ${p.stock}\\n`;\n        if (p.description) result += `\\n${p.description}\\n`;\n        return result + \"\\nAdd to cart?\";\n      }\n\n      case \"view_cart\": {\n        const { rows } = await pool.query('SELECT cart FROM v3_sessions WHERE chat_id = $1', [chatId]);\n        let cart = rows.length > 0 ? rows[0].cart : [];\n        if (!Array.isArray(cart) || cart.length === 0) {\n          return \"🛒 Your cart is empty.\\n\\nSearch for products or type *menu*.\";\n        }\n        \n        let total = 0;\n        let result = \"🛒 *Your Cart:*\\n\\n\";\n        cart.forEach((item, i) => {\n          const itemTotal = item.price * item.quantity;\n          total += itemTotal;\n          result += `${i+1}. *${item.product_name}*\\n   Qty: ${item.quantity} × Rs. ${item.price} = Rs. ${itemTotal}\\n\\n`;\n        });\n        result += `━━━━━━━━━━━━━━━━━━━━\\n*Total: Rs. ${total}*\\n\\n`;\n        return result + \"Ready to checkout? Provide name, phone, and address.\";\n      }\n\n      case \"add_to_cart\": {\n        const { rows: prodRows } = await pool.query('SELECT id, product_name, price FROM products WHERE id = $1', [toolArgs.product_id]);\n        if (prodRows.length === 0) return \"Product not found.\";\n        \n        const product = prodRows[0];\n        const quantity = toolArgs.quantity || 1;\n        \n        const { rows: sessRows } = await pool.query('SELECT cart FROM v3_sessions WHERE chat_id = $1', [chatId]);\n        let cart = sessRows.length > 0 ? sessRows[0].cart : [];\n        if (!Array.isArray(cart)) cart = [];\n        \n        const existingIdx = cart.findIndex(item => item.product_id === product.id);\n        if (existingIdx >= 0) {\n          cart[existingIdx].quantity += quantity;\n        } else {\n          cart.push({ product_id: product.id, product_name: product.product_name, price: product.price, quantity: quantity });\n        }\n        \n        await pool.query(\n          `INSERT INTO v3_sessions (chat_id, cart, last_seen_at) VALUES ($1, $2, NOW())\n           ON CONFLICT (chat_id) DO UPDATE SET cart = $2, last_seen_at = NOW()`,\n          [chatId, JSON.stringify(cart)]\n        );\n        \n        return `✅ *${product.product_name}* added to cart!\\n\\nQty: ${quantity} × Rs. ${product.price}\\n\\nNeed more or ready to checkout?`;\n      }\n\n      case \"remove_from_cart\": {\n        const { rows } = await pool.query('SELECT cart FROM v3_sessions WHERE chat_id = $1', [chatId]);\n        let cart = rows.length > 0 ? rows[0].cart : [];\n        const originalLength = cart.length;\n        cart = cart.filter(item => item.product_id !== toolArgs.product_id);\n        \n        if (cart.length === originalLength) return \"Product not in cart.\";\n        \n        await pool.query('UPDATE v3_sessions SET cart = $1 WHERE chat_id = $2', [JSON.stringify(cart), chatId]);\n        return \"✅ Product removed.\\n\\nView *cart* or continue shopping?\";\n      }\n\n      case \"clear_cart\": {\n        await pool.query('UPDATE v3_sessions SET cart = $1 WHERE chat_id = $2', ['[]', chatId]);\n        return \"🗑️ Cart cleared. Search for new products!\";\n      }\n\n      case \"checkout\": {\n        const { rows: cartRows } = await pool.query('SELECT cart FROM v3_sessions WHERE chat_id = $1', [chatId]);\n        const cart = cartRows.length > 0 ? cartRows[0].cart : [];\n        \n        if (!Array.isArray(cart) || cart.length === 0) return \"Cart is empty! Add products first.\";\n        \n        let total = 0;\n        cart.forEach(item => total += item.price * item.quantity);\n        \n        const { rows } = await pool.query(\n          `INSERT INTO orders (whatsapp_chat_id, customer_name, phone, address, city, total, items, status, created_at)\n           VALUES ($1, $2, $3, $4, $5, $6, $7, 'pending', NOW()) RETURNING id`,\n          [chatId, toolArgs.customer_name, toolArgs.phone, toolArgs.address, toolArgs.city, total, JSON.stringify(cart)]\n        );\n        \n        await pool.query('UPDATE v3_sessions SET cart = $1 WHERE chat_id = $2', ['[]', chatId]);\n        \n        return `✅ *Order Confirmed!*\\n\\nOrder ID: #${rows[0].id}\\nTotal: Rs. ${total}\\n\\nCustomer: ${toolArgs.customer_name}\\nPhone: ${toolArgs.phone}\\nAddress: ${toolArgs.address}, ${toolArgs.city}\\n\\nOur team will contact you soon. Thank you! 🎉`;\n      }\n\n      case \"get_order_status\": {\n        const phone = toolArgs.phone || chatId;\n        const { rows } = await pool.query(\n          `SELECT id, status, total, created_at FROM orders \n           WHERE phone = $1 OR whatsapp_chat_id = $2 ORDER BY created_at DESC LIMIT 3`,\n          [phone, chatId]\n        );\n        \n        if (rows.length === 0) return \"No orders found. Want to place an order?\";\n        \n        let result = \"📦 *Your Orders:*\\n\\n\";\n        rows.forEach((o, i) => {\n          result += `${i+1}. Order #${o.id}\\n   Status: ${o.status}\\n   Total: Rs. ${o.total}\\n   Date: ${new Date(o.created_at).toLocaleDateString('en-PK')}\\n\\n`;\n        });\n        return result;\n      }\n\n      case \"start_quotation\": {\n        await pool.query(\n          `INSERT INTO v3_sessions (chat_id, quote_state, last_seen_at) VALUES ($1, '{\"step\":\"started\"}', NOW())\n           ON CONFLICT (chat_id) DO UPDATE SET quote_state = '{\"step\":\"started\"}', last_seen_at = NOW()`,\n          [chatId]\n        );\n        return `🏠 *Smart Home Installation Quote*\\n\\nTo provide an accurate quote, I need:\\n\\n1. House size (in marlas)?\\n2. Number of stories/floors?\\n3. How many rooms need automation?\\n\\nPlease share these details.`;\n      }\n\n      case \"get_company_info\": {\n        const info = {\n          location: \"📍 *Location:* Okara, Punjab, Pakistan\\n\\nWe serve: Lahore, Islamabad, Multan, Faisalabad, Sahiwal\",\n          contact: \"📞 *Contact:*\\nWhatsApp: (Active)\\nWebsite: waltonmarket.xyz\",\n          payment: \"💳 *Payment Methods:*\\n1. Cash on Delivery\\n2. Bank Transfer (5% discount)\\n\\nBank details shared after order confirmation.\",\n          delivery: \"🚚 *Delivery:*\\nFree delivery in Punjab cities\\n2-3 business days\\nTracking provided\",\n          all: \"📋 *WaltonMarket Info*\\n\\n📍 Okara, Punjab\\n📞 WhatsApp Active\\n💳 COD / Bank Transfer\\n🚚 Free delivery in Punjab\"\n        };\n        return info[toolArgs.info_type] || info.all;\n      }\n\n      case \"escalate_to_human\": {\n        await pool.query(\n          `INSERT INTO v3_sessions (chat_id, escalated_at, last_seen_at) VALUES ($1, NOW(), NOW())\n           ON CONFLICT (chat_id) DO UPDATE SET escalated_at = NOW()`,\n          [chatId]\n        );\n        return \"👤 Connecting you to human support.\\n\\nOur team will respond shortly.\";\n      }\n\n      default:\n        return `Tool \"${toolName}\" is not available yet.`;\n    }\n  } catch (err) {\n    console.error(`Tool error [${toolName}]:`, err);\n    return `Sorry, technical issue. Please try again.`;\n  }\n}\n\n// ═══ MENU PRE-PROCESSOR ═══\n// Intercept single-digit menu selections BEFORE calling Gemini\n// This handles the most common failure: Gemini treating \"3\" as a search query\nconst userMsg = workflowState.userMessage.trim();\n\nif (/^[1-4]$/.test(userMsg)) {\n  // Check if recent conversation contains a menu\n  const recentTexts = workflowState.contents\n    .slice(-6)\n    .map(c => (c.parts || []).map(p => p.text || (p.functionResponse?.response?.result) || '').join(''))\n    .join('');\n  \n  const isMenuContext = recentTexts.includes('1️⃣') && recentTexts.includes('View Catalogue');\n  \n  if (isMenuContext) {\n    const menuToolMap = {\n      '1': { name: 'search_products', args: { query: '' } },\n      '2': { name: 'get_order_status', args: {} },\n      '3': { name: 'start_quotation', args: {} },\n      '4': { name: 'escalate_to_human', args: {} }\n    };\n    \n    const directTool = menuToolMap[userMsg];\n    const toolResult = await executeTool(directTool.name, directTool.args, workflowState.chatId);\n    \n    workflowState.contents.push({\n      role: \"model\",\n      parts: [{ functionCall: { name: directTool.name, args: directTool.args } }]\n    });\n    \n    workflowState.contents.push({\n      role: \"user\",\n      parts: [{ functionResponse: { name: directTool.name, response: { result: toolResult } } }]\n    });\n    \n    workflowState.iteration++;\n    return [{ json: workflowState }];\n  }\n}\n\n// ═══ CALL GEMINI WITH RETRY ═══\nlet response;\nlet attempts = 0;\nconst maxAttempts = 4;\n\nwhile (attempts < maxAttempts) {\n  try {\n    response = await this.helpers.httpRequest({\n      method: 'POST',\n      url: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',\n      headers: { 'Content-Type': 'application/json' },\n      qs: { key: GEMINI_API_KEY },\n      body: {\n        contents: workflowState.contents,\n        tools,\n        systemInstruction: { parts: [{ text: systemInstruction }] },\n        generationConfig: { temperature: 0.2 }\n      },\n      timeout: 25000\n    });\n    break;\n  } catch (err) {\n    attempts++;\n    const statusCode = err.response?.status || err.statusCode || 0;\n    const isRetryable = (statusCode >= 500 && statusCode < 600) || statusCode === 429 || err.code === 'ETIMEDOUT';\n    \n    if (isRetryable && attempts < maxAttempts) {\n      await new Promise(r => setTimeout(r, Math.min(1000 * Math.pow(2, attempts), 8000)));\n      continue;\n    }\n    \n    return [{\n      json: {\n        mode: 'FINAL_REPLY',\n        ...workflowState,\n        reply: \"I'm experiencing technical difficulties. Please try again in a moment.\"\n      }\n    }];\n  }\n}\n\n// ═══ HANDLE RESPONSE ═══\nconst parts = response.candidates?.[0]?.content?.parts || [];\nconst functionCalls = parts.filter(p => p.functionCall).map(p => p.functionCall);\nconst textParts = parts.filter(p => p.text).map(p => p.text);\n\nif (functionCalls.length === 0 && textParts.length > 0) {\n  return [{\n    json: {\n      mode: 'FINAL_REPLY',\n      ...workflowState,\n      reply: textParts.join('\\n')\n    }\n  }];\n}\n\nif (functionCalls.length > 0) {\n  const toolCall = functionCalls[0];\n  const toolResult = await executeTool(toolCall.name, toolCall.args || {}, workflowState.chatId);\n  \n  workflowState.contents.push({\n    role: \"model\",\n    parts: [{ functionCall: { name: toolCall.name, args: toolCall.args } }]\n  });\n  \n  workflowState.contents.push({\n    role: \"user\",\n    parts: [{ functionResponse: { name: toolCall.name, response: { result: toolResult } } }]\n  });\n  \n  workflowState.iteration++;\n  return [{ json: workflowState }];\n}\n\nreturn [{\n  json: {\n    mode: 'FINAL_REPLY',\n    ...workflowState,\n    reply: \"Sorry, I got confused. Type *menu* for options.\"\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -288,
+        -576
+      ],
+      "id": "3889c360-a731-4181-9ea9-d5cb35204810",
+      "name": "Agent Brain"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO v3_conversation_history (chat_id, role, content) VALUES \n  ('{{ $json.chatId }}', 'user', $${{ $json.userMessage }}$$),\n  ('{{ $json.chatId }}', 'model', $${{ $json.reply }}$$);",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        192,
+        -624
+      ],
+      "id": "00220d96-9db4-40ae-a4ec-507e99aecddf",
+      "name": "Save Turn",
+      "credentials": {
+        "postgres": {
+          "id": "REDACTED_CREDENTIAL_ID",
+          "name": "REDACTED_CREDENTIAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        528,
+        -624
+      ],
+      "id": "fa1da99d-ea18-4ef7-8f75-0e19f1f5a5a8",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "46eb7cec-0c38-4f1f-9f36-c8eb34ae9dcc",
+              "name": "reply",
+              "value": "={{ $('Agent Brain').first().json.reply }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        368,
+        -624
+      ],
+      "id": "0d1a56ae-3ece-4bbc-8284-94036d71332e",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "829b0ba7-132f-49b3-897a-59356f566ccb",
+              "leftValue": "={{ $json.mode }}",
+              "rightValue": "FINAL_REPLY",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -80,
+        -576
+      ],
+      "id": "8b7e9e82-14d7-4bcd-bb20-51d42a3c970d",
+      "name": "Check Mode"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Normalize Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Payload": {
+      "main": [
+        [
+          {
+            "node": "Fetch History",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch History": {
+      "main": [
+        [
+          {
+            "node": "Agent Brain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agent Brain": {
+      "main": [
+        [
+          {
+            "node": "Check Mode",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Turn": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Mode": {
+      "main": [
+        [
+          {
+            "node": "Save Turn",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Agent Brain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}

@@ -1,0 +1,21 @@
+# secrets and local env
+.env
+.env.*
+*.env
+secrets/
+*.pem
+*.key
+id_rsa
+id_ed25519
+id_ed25519_github
+
+# dependencies and runtime data
+node_modules/
+sessions/
+volumes/
+pgdata/
+n8ndata/
+waha_sessions/
+quotations/
+*.sql.gz
+*.dump
