@@ -7,7 +7,8 @@ import argparse, base64, json, os, struct, subprocess, time, zlib
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError
 
-WEBHOOK = os.environ.get("ARIK_WEBHOOK", "http://127.0.0.1:5678/webhook/ai-chat-router-test")
+WEBHOOK = os.environ.get("ARIK_WEBHOOK", "http://127.0.0.1:5678/webhook/ai-chat-phase1-test")
+LIVE_VERSION = "59e9d471-8ef6-401d-877f-66ab25b49141"
 DB = os.environ.get("ARIK_DB") == "1"
 RESULT = os.environ.get("ARIK_RESULT", "/root/backups/router-suite-result.json")
 
@@ -161,6 +162,8 @@ def main():
         raise SystemExit("set ARIK_DB=1")
 
     psql("""
+DELETE FROM arik_observability WHERE session_id LIKE 'test-rtr-%';
+DELETE FROM arik_session_memory WHERE session_id LIKE 'test-rtr-%';
 DELETE FROM arik_turn_monitor WHERE session_id LIKE 'test-rtr-%';
 DELETE FROM whatsapp_identities WHERE phone LIKE 'test-rtr-%' OR chat_id LIKE 'test-rtr-%';
 DELETE FROM sessions WHERE session_id LIKE 'test-rtr-%';
@@ -377,9 +380,9 @@ DELETE FROM sessions WHERE session_id LIKE 'test-rtr-%';
     hooks = psql("SELECT string_agg(\"webhookPath\", ',' ORDER BY \"webhookPath\") FROM webhook_entity")
     check("43 shopify webhooks still registered", "shopify-order-created" in hooks and "shopify-order-fulfilled" in hooks and "ai-chat" in hooks, hooks)
 
-    # 44 live version still the backup until publish
+    # 44 live router version must stay on the published router while Phase 1 is a copy
     ver = psql("SELECT \"activeVersionId\" FROM workflow_entity WHERE id = '25xrGALJPr79bTVh'")
-    check("44 live workflow still on the media backup", ver == "3fbc6e17-6243-4175-a284-7d7943c13fb2", ver)
+    check("44 live workflow still on the published router", ver == LIVE_VERSION, ver)
 
     # 45 daily summary
     p = subprocess.run(["bash", "/usr/local/sbin/arik-daily-summary.sh"], capture_output=True, text=True)
@@ -398,10 +401,94 @@ DELETE FROM sessions WHERE session_id LIKE 'test-rtr-%';
     row = snap("test-rtr-hi")
     check("48 greeting does not increment abuse", row and row.get("abuse") in (0, None), str(row.get("abuse") if row else None))
 
+    bulb = lights[0]
+
+    def t_set():
+        seed("test-rtr-setq", cart=[{"name": bulb["product_name"], "price": bulb["price"], "qty": 100}])
+        r = say("test-rtr-setq", "oh nahi nahi muja sirf 2 chahiye", timeout=45)
+        return (qty_of(r.get("cart"), bulb["product_name"]) == 2, str(r.get("cart"))[:140])
+    model("49 sirf 2 sets quantity instead of adding", t_set)
+
+    def t_rm100():
+        seed("test-rtr-rm100", cart=[{"name": bulb["product_name"], "price": bulb["price"], "qty": 2}])
+        r = say("test-rtr-rm100", "100 pieces esme se remove kerdo", timeout=45)
+        gone = qty_of(r.get("cart"), bulb["product_name"]) == 0 and "couldn't find" not in r["last"].lower()
+        return (gone, r["last"][:100])
+    model("50 remove 100 pieces from the only cart line", t_rm100)
+
+    def t_rmname():
+        seed("test-rtr-rmname", cart=[{"name": bulb["product_name"], "price": bulb["price"], "qty": 2}])
+        r = say("test-rtr-rmname", "remove smart bulb 100 piece", timeout=45)
+        gone = qty_of(r.get("cart"), bulb["product_name"]) == 0 and "couldn't find" not in r["last"].lower()
+        return (gone, r["last"][:100])
+    model("51 remove smart bulb 100 uses the cart line", t_rmname)
+
+    def t_urdu():
+        seed("test-rtr-urdu", history=[
+            {"role": "user", "text": "what is a smart home", "ts": 1},
+            {"role": "assistant", "text": "A smart home lets you switch lights from your phone.", "ts": 2},
+        ])
+        r = say("test-rtr-urdu", "esko urdu mien baro", timeout=45)
+        low = r["last"].lower()
+        urdu = any("\u0600" <= ch <= "\u06FF" for ch in r["last"])
+        ok = ("maps.app" not in low) and ("jinnah" not in low) and ("goo.gl" not in low) and (urdu or "smart home" in low or "urdu" in low)
+        return (ok, r["last"][:120])
+    model("52 urdu repeat is not the store address", t_urdu)
+
+    def t_love():
+        r = say("test-rtr-love", "mujha payar karo", timeout=40)
+        low = r["last"].lower()
+        ok = r.get("abuse") in (0, None) and not r.get("lock") and "respectful" not in low and "stopped" not in low
+        return (ok, r["last"][:100])
+    model("53 playful payar is not abuse", t_love)
+
+    def t_wood():
+        r = say("test-rtr-wood", "mujhe indoor wooden door lock chahiye", timeout=45)
+        low = r["last"].lower()
+        ok = "wooden" in low and "bedroom" in low and "5 way unlock" in low and not r.get("cart")
+        return (ok, r["last"][:140])
+    model("54 indoor wooden door lock is attribute reasoning", t_wood)
+
+    def t_hes():
+        r = say("test-rtr-hes", "mujhe warranty ka bharosa nahi, main confuse hoon", timeout=45)
+        mem = psql("SELECT coalesce(buying_stage,'') || '|' || coalesce(objection,'') || '|' || lead_score::text FROM arik_session_memory WHERE session_id = 'test-rtr-hes'")
+        obs = psql("SELECT coalesce(latency_ms,0)::text || '|' || coalesce(prompt_tokens,0)::text || '|' || coalesce(output_tokens,0)::text FROM arik_observability WHERE session_id = 'test-rtr-hes' ORDER BY id DESC LIMIT 1")
+        ok = ("human" in r["last"].lower()) and (not r.get("lock")) and (not r.get("esc")) and r.get("abuse") in (0, None) and mem.startswith("hesitation|") and obs not in ("", None)
+        return (ok, mem + " obs " + obs + " " + r["last"][:80])
+    model("55 hesitation offers a human and stores memory", t_hes)
+
+    mem_buy = psql("SELECT coalesce(lead_score,0)::text || '|' || coalesce(last_board_intent,'') FROM arik_session_memory WHERE session_id = 'test-rtr-setq'")
+    obs_buy = psql("SELECT coalesce(latency_ms,0)::text || '|' || coalesce(prompt_tokens,0)::text || '|' || coalesce(output_tokens,0)::text FROM arik_observability WHERE session_id = 'test-rtr-setq' ORDER BY id DESC LIMIT 1")
+    check("56 set-quantity turn records lead score and tokens", mem_buy.startswith(("20|", "15|", "25|", "10|")) or (mem_buy[:2].isdigit() and int(mem_buy.split("|")[0]) >= 15), mem_buy + " " + obs_buy)
+    parts = (obs_buy or "0|0|0").split("|")
+    check("57 set-quantity observability has latency", len(parts) == 3 and int(parts[0]) >= 0 and (int(parts[1]) + int(parts[2])) > 0, obs_buy)
+
+    scaffolds = psql("SELECT count(*) FROM arik_board_modules WHERE status = 'scaffold'")
+    check("58 later board modules are scaffold only", int(scaffolds or 0) >= 8, scaffolds)
+
+    cost_raw = psql("""
+SELECT coalesce(sum(prompt_tokens),0)::text || '|' || coalesce(sum(output_tokens),0)::text
+  || '|' || coalesce(round(avg(latency_ms)),0)::text || '|' || count(*)::text
+FROM arik_observability WHERE session_id LIKE 'test-rtr-%'
+""")
+    pin, pout, avg_ms, nrows = (cost_raw.split("|") + ["0", "0", "0", "0"])[:4]
+    # Google AI Studio standard paid text rate for gemini-2.5-flash, $0.30 / 1M input and $2.50 / 1M output.
+    usd = (int(pin) * 0.30 + int(pout) * 2.50) / 1000000
+    print(f"tokens_in {pin} tokens_out {pout} avg_latency_ms {avg_ms} obs_rows {nrows} paid_text_usd {usd:.6f}")
+
     passed = sum(1 for r in results if r["ok"])
     failed = sum(1 for r in results if not r["ok"])
     print(f"\n{passed} passed, {failed} failed, {len(results)} total")
-    out = {"passed": passed, "failed": failed, "total": len(results), "cases": results}
+    out = {
+        "passed": passed,
+        "failed": failed,
+        "total": len(results),
+        "prompt_tokens": int(pin),
+        "output_tokens": int(pout),
+        "avg_latency_ms": int(float(avg_ms)),
+        "paid_text_usd": round(usd, 6),
+        "cases": results,
+    }
     try:
         with open(RESULT, "w") as f:
             json.dump(out, f, indent=2)
@@ -409,6 +496,8 @@ DELETE FROM sessions WHERE session_id LIKE 'test-rtr-%';
     except OSError as e:
         print("result_not_saved", e)
     psql("""
+DELETE FROM arik_observability WHERE session_id LIKE 'test-rtr-%';
+DELETE FROM arik_session_memory WHERE session_id LIKE 'test-rtr-%';
 DELETE FROM arik_turn_monitor WHERE session_id LIKE 'test-rtr-%';
 DELETE FROM whatsapp_identities WHERE phone LIKE 'test-rtr-%' OR chat_id LIKE 'test-rtr-%';
 DELETE FROM sessions WHERE session_id LIKE 'test-rtr-%';
